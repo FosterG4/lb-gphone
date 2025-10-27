@@ -21,3 +21,5 @@ Thumbs.db
 *.tmp
 *.bak
 .kiro/
+NOTIFICATION_TEST.md
+ERROR_HANDLING_TEST.md

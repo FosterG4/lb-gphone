@@ -1,0 +1,296 @@
+/* Theme System - CSS Variables for Dynamic Theming */
+
+/* Default Theme (Dark) */
+:root,
+[data-theme="dark"] {
+  /* Primary Colors */
+  --primary-color: #007AFF;
+  --primary-hover: #0051D5;
+  --primary-active: #003D99;
+  
+  /* Background Colors */
+  --background-primary: #000000;
+  --background-secondary: #1C1C1E;
+  --background-tertiary: #2C2C2E;
+  --background-elevated: #3A3A3C;
+  
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #EBEBF5;
+  --text-tertiary: #EBEBF599;
+  --text-quaternary: #EBEBF54D;
+  
+  /* Border Colors */
+  --border-primary: #38383A;
+  --border-secondary: #48484A;
+  
+  /* Status Colors */
+  --success-color: #34C759;
+  --warning-color: #FF9500;
+  --error-color: #FF3B30;
+  --info-color: #5AC8FA;
+  
+  /* Overlay Colors */
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --overlay-medium: rgba(255, 255, 255, 0.2);
+  --overlay-heavy: rgba(255, 255, 255, 0.3);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  
+  /* Shadow */
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.5);
+  
+  /* App Specific Colors */
+  --app-icon-bg: #2C2C2E;
+  --notification-bg: rgba(28, 28, 30, 0.95);
+  --card-bg: #1C1C1E;
+  --input-bg: #3A3A3C;
+  --input-border: #48484A;
+  
+  /* Accent Colors */
+  --accent-red: #FF3B30;
+  --accent-orange: #FF9500;
+  --accent-yellow: #FFCC00;
+  --accent-green: #34C759;
+  --accent-teal: #5AC8FA;
+  --accent-blue: #007AFF;
+  --accent-indigo: #5856D6;
+  --accent-purple: #AF52DE;
+  --accent-pink: #FF2D55;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  /* Primary Colors */
+  --primary-color: #007AFF;
+  --primary-hover: #0051D5;
+  --primary-active: #003D99;
+  
+  /* Background Colors */
+  --background-primary: #FFFFFF;
+  --background-secondary: #F2F2F7;
+  --background-tertiary: #E5E5EA;
+  --background-elevated: #FFFFFF;
+  
+  /* Text Colors */
+  --text-primary: #000000;
+  --text-secondary: #3C3C43;
+  --text-tertiary: #3C3C4399;
+  --text-quaternary: #3C3C434D;
+  
+  /* Border Colors */
+  --border-primary: #C6C6C8;
+  --border-secondary: #D1D1D6;
+  
+  /* Status Colors */
+  --success-color: #34C759;
+  --warning-color: #FF9500;
+  --error-color: #FF3B30;
+  --info-color: #5AC8FA;
+  
+  /* Overlay Colors */
+  --overlay-light: rgba(0, 0, 0, 0.05);
+  --overlay-medium: rgba(0, 0, 0, 0.1);
+  --overlay-heavy: rgba(0, 0, 0, 0.2);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  
+  /* Shadow */
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  /* App Specific Colors */
+  --app-icon-bg: #F2F2F7;
+  --notification-bg: rgba(242, 242, 247, 0.95);
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --input-border: #C6C6C8;
+  
+  /* Accent Colors */
+  --accent-red: #FF3B30;
+  --accent-orange: #FF9500;
+  --accent-yellow: #FFCC00;
+  --accent-green: #34C759;
+  --accent-teal: #5AC8FA;
+  --accent-blue: #007AFF;
+  --accent-indigo: #5856D6;
+  --accent-purple: #AF52DE;
+  --accent-pink: #FF2D55;
+}
+
+/* OLED Theme (Pure Black) */
+[data-theme="oled"] {
+  /* Primary Colors */
+  --primary-color: #0A84FF;
+  --primary-hover: #0066CC;
+  --primary-active: #004C99;
+  
+  /* Background Colors */
+  --background-primary: #000000;
+  --background-secondary: #000000;
+  --background-tertiary: #1C1C1E;
+  --background-elevated: #2C2C2E;
+  
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #EBEBF5;
+  --text-tertiary: #EBEBF599;
+  --text-quaternary: #EBEBF54D;
+  
+  /* Border Colors */
+  --border-primary: #2C2C2E;
+  --border-secondary: #38383A;
+  
+  /* Status Colors */
+  --success-color: #30D158;
+  --warning-color: #FF9F0A;
+  --error-color: #FF453A;
+  --info-color: #64D2FF;
+  
+  /* Overlay Colors */
+  --overlay-light: rgba(255, 255, 255, 0.08);
+  --overlay-medium: rgba(255, 255, 255, 0.16);
+  --overlay-heavy: rgba(255, 255, 255, 0.24);
+  --overlay-dark: rgba(0, 0, 0, 0.7);
+  
+  /* Shadow */
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.7);
+  
+  /* App Specific Colors */
+  --app-icon-bg: #1C1C1E;
+  --notification-bg: rgba(0, 0, 0, 0.98);
+  --card-bg: #000000;
+  --input-bg: #1C1C1E;
+  --input-border: #2C2C2E;
+  
+  /* Accent Colors */
+  --accent-red: #FF453A;
+  --accent-orange: #FF9F0A;
+  --accent-yellow: #FFD60A;
+  --accent-green: #30D158;
+  --accent-teal: #64D2FF;
+  --accent-blue: #0A84FF;
+  --accent-indigo: #5E5CE6;
+  --accent-purple: #BF5AF2;
+  --accent-pink: #FF375F;
+}
+
+/* Theme Transition */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Disable transitions during theme switch for instant change */
+.theme-switching * {
+  transition: none !important;
+}
+
+/* Apply theme colors to common elements */
+body {
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+}
+
+/* Buttons */
+button {
+  color: var(--text-primary);
+}
+
+button.primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+button.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+button.primary:active {
+  background-color: var(--primary-active);
+}
+
+button.secondary {
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
+}
+
+button.secondary:hover {
+  background-color: var(--background-elevated);
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--input-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+}
+
+/* Cards */
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-small);
+}
+
+/* Dividers */
+.divider {
+  background-color: var(--border-primary);
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* Status indicators */
+.status-success {
+  color: var(--success-color);
+}
+
+.status-warning {
+  color: var(--warning-color);
+}
+
+.status-error {
+  color: var(--error-color);
+}
+
+.status-info {
+  color: var(--info-color);
+}
+
+/* Scrollbar theming */
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--overlay-medium);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--overlay-heavy);
+}
