@@ -1,8 +1,8 @@
 // NUI Communication Utility
 // Handles communication between Vue and Lua
 
-const resourceName = window.location.hostname === 'localhost' 
-    ? 'fivem-smartphone-nui' 
+const resourceName = window.location.hostname === 'localhost'
+    ? 'fivem-smartphone-nui'
     : GetParentResourceName()
 
 export async function nuiCallback(action, data = {}) {
@@ -14,7 +14,7 @@ export async function nuiCallback(action, data = {}) {
             },
             body: JSON.stringify(data)
         })
-        
+
         return await response.json()
     } catch (error) {
         console.error(`NUI Callback Error [${action}]:`, error)
@@ -30,5 +30,6 @@ function GetParentResourceName() {
 // Alias for compatibility
 export const fetchNui = nuiCallback
 export const postNUI = nuiCallback
+export const sendNUIMessage = nuiCallback
 
 export { resourceName }

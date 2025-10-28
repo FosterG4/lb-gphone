@@ -8,6 +8,11 @@ import apps from './modules/apps'
 import settings from './modules/settings'
 import media from './modules/media'
 import garage from './modules/garage'
+import home from './modules/home'
+import shotz from './modules/shotz'
+import chirper from './modules/chirper'
+import modish from './modules/modish'
+import flicker from './modules/flicker'
 
 export default createStore({
   modules: {
@@ -18,6 +23,11 @@ export default createStore({
     apps,
     settings,
     media,
-    garage
+    garage,
+    home,
+    shotz,
+    chirper,
+    modish,
+    flicker
   }
 })

@@ -27,6 +27,7 @@ client_scripts {
     'client/settings.lua',
     'client/location.lua',
     'client/vehicle.lua',
+    'client/property.lua',
     'client/media/camera.lua',
     'client/media/video.lua',
     'client/media/audio.lua'
@@ -59,6 +60,9 @@ server_scripts {
     'server/apps/weather.lua',
     'server/apps/appstore.lua',
     'server/apps/garage.lua',
+    'server/apps/home.lua',
+    'server/apps/shotz.lua',
+    'server/apps/modish.lua',
     'server/media/storage.lua',
     'server/media/photos.lua',
     'server/media/videos.lua',

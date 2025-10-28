@@ -1,97 +1,251 @@
 <template>
   <div class="chirper-app">
-    <!-- Create Post Section -->
-    <div class="create-post-section">
-      <textarea 
-        v-model="newChirp" 
-        placeholder="What's happening?"
-        class="chirp-input"
-        :maxlength="280"
-        :disabled="isPosting"
-        @input="updateCharCount"
-      ></textarea>
-      
-      <div class="post-actions">
-        <span class="char-count" :class="{ warning: charCount > 260, error: charCount >= 280 }">
-          {{ charCount }}/280
-        </span>
-        <button 
-          @click="handlePostChirp" 
-          class="post-button"
-          :disabled="!canPost || isPosting"
-        >
-          {{ isPosting ? 'Posting...' : 'Chirp' }}
+    <!-- Header -->
+    <div class="chirper-header">
+      <div class="header-left">
+        <button v-if="currentView !== 'feed'" @click="goBack" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>{{ headerTitle }}</h1>
+      </div>
+      <div class="header-right">
+        <button v-if="currentView === 'feed'" @click="showCreatePost = true" class="create-btn">
+          <i class="fas fa-feather-alt"></i>
         </button>
       </div>
-      
-      <div v-if="postError" class="error-message">
-        {{ postError }}
-      </div>
     </div>
-    
-    <!-- Feed Tabs -->
-    <div class="feed-tabs">
-      <button 
-        class="tab-button" 
-        :class="{ active: activeTab === 'feed' }"
-        @click="activeTab = 'feed'"
-      >
-        Feed
-      </button>
-      <button 
-        class="tab-button" 
-        :class="{ active: activeTab === 'myChirps' }"
-        @click="activeTab = 'myChirps'"
-      >
-        My Chirps
-      </button>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading posts...</p>
     </div>
-    
-    <!-- Feed Display -->
-    <div class="feed-container">
-      <div v-if="isLoading" class="loading-state">
-        Loading chirps...
-      </div>
-      
-      <div v-else-if="currentFeed.length === 0" class="empty-state">
-        {{ activeTab === 'feed' ? 'No chirps yet' : 'You haven\'t posted anything yet' }}
-      </div>
-      
-      <div v-else class="chirp-list">
+
+    <!-- Feed View -->
+    <div v-else-if="currentView === 'feed'" class="feed-layout">
+      <!-- Main Feed -->
+      <div class="feed-container" @scroll="handleScroll">
+        <div v-if="currentFeed.length === 0" class="empty-state">
+          <i class="fas fa-feather-alt"></i>
+          <p>No posts yet</p>
+          <p class="hint">Be the first to chirp!</p>
+        </div>
+
         <div 
-          v-for="chirp in currentFeed" 
-          :key="chirp.id"
-          class="chirp-item"
+          v-for="post in currentFeed" 
+          :key="post.id" 
+          class="post-item"
+          @click="viewThread(post)"
         >
-          <div class="chirp-header">
+          <!-- Post Header -->
+          <div class="post-header">
             <div class="author-info">
               <div class="author-avatar">
-                {{ getInitials(chirp.author_name) }}
+                {{ getInitials(post.author_name) }}
               </div>
               <div class="author-details">
-                <div class="author-name">{{ chirp.author_name }}</div>
-                <div class="author-number">{{ chirp.author_number }}</div>
+                <div class="author-name">{{ post.author_name }}</div>
+                <div class="post-time">{{ formatTime(post.created_at) }}</div>
               </div>
             </div>
-            <div class="chirp-time">{{ formatTime(chirp.created_at) }}</div>
           </div>
-          
-          <div class="chirp-content">
-            {{ chirp.content }}
+
+          <!-- Post Content -->
+          <div class="post-content">
+            <p v-html="formatContent(post.content)"></p>
           </div>
-          
-          <div class="chirp-actions">
+
+          <!-- Post Actions -->
+          <div class="post-actions">
             <button 
-              class="action-button like-button"
-              :class="{ liked: chirp.isLiked }"
-              @click="handleLikeChirp(chirp.id)"
+              class="action-btn reply-btn"
+              @click.stop="replyToPost(post)"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-              <span>{{ chirp.likes }}</span>
+              <i class="far fa-comment"></i>
+              <span v-if="post.replies > 0">{{ formatCount(post.replies) }}</span>
+            </button>
+            <button 
+              :class="['action-btn', 'repost-btn', { reposted: post.isReposted }]"
+              @click.stop="handleRepost(post.id)"
+            >
+              <i class="fas fa-retweet"></i>
+              <span v-if="post.reposts > 0">{{ formatCount(post.reposts) }}</span>
+            </button>
+            <button 
+              :class="['action-btn', 'like-btn', { liked: post.isLiked }]"
+              @click.stop="handleLike(post.id)"
+            >
+              <i :class="post.isLiked ? 'fas fa-heart' : 'far fa-heart'"></i>
+              <span v-if="post.likes > 0">{{ formatCount(post.likes) }}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Trending Sidebar -->
+      <div class="trending-sidebar">
+        <div class="trending-header">
+          <h3>Trending</h3>
+          <button @click="refreshTrending" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+        
+        <div v-if="trending.length === 0" class="no-trending">
+          No trending topics yet
+        </div>
+        
+        <div v-else class="trending-list">
+          <div 
+            v-for="(topic, index) in trending" 
+            :key="index" 
+            class="trending-item"
+            @click="filterByHashtag(topic.hashtag)"
+          >
+            <div class="trending-rank">{{ index + 1 }}</div>
+            <div class="trending-info">
+              <div class="trending-hashtag">#{{ topic.hashtag }}</div>
+              <div class="trending-count">{{ formatCount(topic.post_count) }} posts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thread View -->
+    <div v-else-if="currentView === 'thread' && currentThread" class="thread-view">
+      <div class="thread-container">
+        <!-- Main Post -->
+        <div class="main-post">
+          <div class="post-header">
+            <div class="author-info">
+              <div class="author-avatar">
+                {{ getInitials(currentThread.post.author_name) }}
+              </div>
+              <div class="author-details">
+                <div class="author-name">{{ currentThread.post.author_name }}</div>
+                <div class="post-time">{{ formatTime(currentThread.post.created_at) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="post-content">
+            <p v-html="formatContent(currentThread.post.content)"></p>
+          </div>
+
+          <div class="post-actions">
+            <button 
+              class="action-btn reply-btn"
+              @click="replyToPost(currentThread.post)"
+            >
+              <i class="far fa-comment"></i>
+              <span v-if="currentThread.post.replies > 0">{{ formatCount(currentThread.post.replies) }}</span>
+            </button>
+            <button 
+              :class="['action-btn', 'repost-btn', { reposted: currentThread.post.isReposted }]"
+              @click="handleRepost(currentThread.post.id)"
+            >
+              <i class="fas fa-retweet"></i>
+              <span v-if="currentThread.post.reposts > 0">{{ formatCount(currentThread.post.reposts) }}</span>
+            </button>
+            <button 
+              :class="['action-btn', 'like-btn', { liked: currentThread.post.isLiked }]"
+              @click="handleLike(currentThread.post.id)"
+            >
+              <i :class="currentThread.post.isLiked ? 'fas fa-heart' : 'far fa-heart'"></i>
+              <span v-if="currentThread.post.likes > 0">{{ formatCount(currentThread.post.likes) }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Replies -->
+        <div class="replies-section">
+          <h3 v-if="currentThread.replies.length > 0">
+            Replies ({{ currentThread.replies.length }})
+          </h3>
+          
+          <div v-if="currentThread.replies.length === 0" class="no-replies">
+            No replies yet. Be the first to reply!
+          </div>
+
+          <div 
+            v-for="reply in currentThread.replies" 
+            :key="reply.id" 
+            class="reply-item"
+          >
+            <div class="reply-header">
+              <div class="author-info">
+                <div class="author-avatar">
+                  {{ getInitials(reply.author_name) }}
+                </div>
+                <div class="author-details">
+                  <div class="author-name">{{ reply.author_name }}</div>
+                  <div class="post-time">{{ formatTime(reply.created_at) }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="reply-content">
+              <p v-html="formatContent(reply.content)"></p>
+            </div>
+
+            <div class="reply-actions">
+              <button 
+                :class="['action-btn', 'like-btn', { liked: reply.isLiked }]"
+                @click="handleLike(reply.id)"
+              >
+                <i :class="reply.isLiked ? 'fas fa-heart' : 'far fa-heart'"></i>
+                <span v-if="reply.likes > 0">{{ formatCount(reply.likes) }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Post Dialog -->
+    <div v-if="showCreatePost" class="dialog-overlay" @click.self="closeCreatePost">
+      <div class="create-post-dialog">
+        <div class="dialog-header">
+          <h3>{{ replyingTo ? 'Reply' : 'New Chirp' }}</h3>
+          <button @click="closeCreatePost" class="close-btn">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="dialog-content">
+          <!-- Replying To Indicator -->
+          <div v-if="replyingTo" class="replying-to">
+            <i class="fas fa-reply"></i>
+            <span>Replying to <strong>{{ replyingTo.author_name }}</strong></span>
+          </div>
+
+          <!-- Post Input -->
+          <textarea 
+            v-model="newPostContent" 
+            placeholder="What's happening?"
+            maxlength="280"
+            class="post-input"
+            ref="postInput"
+            @input="updateCharCount"
+          ></textarea>
+          
+          <div class="post-meta">
+            <div class="char-count" :class="{ warning: charCount > 260, error: charCount >= 280 }">
+              {{ charCount }}/280
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-actions">
+          <button @click="closeCreatePost" class="cancel-btn">Cancel</button>
+          <button 
+            @click="createPost" 
+            class="post-btn"
+            :disabled="!canPost || isPosting"
+          >
+            {{ isPosting ? 'Posting...' : (replyingTo ? 'Reply' : 'Chirp') }}
+          </button>
         </div>
       </div>
     </div>
@@ -99,307 +253,367 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Chirper',
-  setup() {
-    const store = useStore()
+  
+  data() {
+    return {
+      currentView: 'feed', // 'feed', 'thread'
+      currentThread: null,
+      showCreatePost: false,
+      newPostContent: '',
+      charCount: 0,
+      isPosting: false,
+      replyingTo: null,
+      page: 0,
+      pageSize: 20,
+      hasMore: true,
+      isLoadingMore: false,
+      hashtagFilter: null
+    };
+  },
+  
+  computed: {
+    ...mapState('chirper', ['feed', 'myPosts', 'trending', 'loading']),
     
-    const newChirp = ref('')
-    const charCount = ref(0)
-    const isPosting = ref(false)
-    const isLoading = ref(false)
-    const postError = ref('')
-    const activeTab = ref('feed')
+    headerTitle() {
+      if (this.currentView === 'thread') return 'Thread';
+      return 'Chirper';
+    },
     
-    const feed = computed(() => store.state.apps.chirper.feed)
-    const myChirps = computed(() => store.state.apps.chirper.myChirps)
-    
-    const currentFeed = computed(() => {
-      return activeTab.value === 'feed' ? feed.value : myChirps.value
-    })
-    
-    const canPost = computed(() => {
-      return newChirp.value.trim().length > 0 && charCount.value <= 280
-    })
-    
-    const updateCharCount = () => {
-      charCount.value = newChirp.value.length
-    }
-    
-    const getInitials = (name) => {
-      if (!name) return '?'
-      const parts = name.split(' ')
-      if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase()
+    currentFeed() {
+      if (this.hashtagFilter) {
+        return this.feed.filter(post => 
+          post.content.toLowerCase().includes(`#${this.hashtagFilter.toLowerCase()}`)
+        );
       }
-      return name.substring(0, 2).toUpperCase()
-    }
+      return this.feed;
+    },
     
-    const formatTime = (timestamp) => {
-      const date = new Date(timestamp)
-      const now = new Date()
-      const diffMs = now - date
-      const diffMins = Math.floor(diffMs / 60000)
-      const diffHours = Math.floor(diffMs / 3600000)
-      const diffDays = Math.floor(diffMs / 86400000)
-      
-      if (diffMins < 1) return 'Just now'
-      if (diffMins < 60) return `${diffMins}m`
-      if (diffHours < 24) return `${diffHours}h`
-      if (diffDays < 7) return `${diffDays}d`
-      
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    canPost() {
+      return this.newPostContent.trim().length > 0 && 
+             this.newPostContent.length <= 280 && 
+             !this.isPosting;
     }
+  },
+  
+  mounted() {
+    this.loadFeed();
+    this.loadTrending();
+  },
+  
+  methods: {
+    ...mapActions('chirper', [
+      'fetchFeed',
+      'fetchMyPosts',
+      'fetchTrending',
+      'fetchThread',
+      'createChirperPost',
+      'likePost',
+      'repostPost',
+      'replyToPost',
+      'deletePost'
+    ]),
     
-    const handlePostChirp = async () => {
-      if (!canPost.value || isPosting.value) return
+    async loadFeed() {
+      await this.fetchFeed({ limit: this.pageSize, offset: this.page * this.pageSize });
+    },
+    
+    async loadTrending() {
+      await this.fetchTrending();
+    },
+    
+    async refreshTrending() {
+      await this.loadTrending();
+    },
+    
+    async handleScroll(event) {
+      const { scrollTop, scrollHeight, clientHeight } = event.target;
       
-      postError.value = ''
-      isPosting.value = true
+      if (scrollTop + clientHeight >= scrollHeight - 100 && !this.isLoadingMore && this.hasMore) {
+        this.isLoadingMore = true;
+        this.page++;
+        
+        const result = await this.fetchFeed({ 
+          limit: this.pageSize, 
+          offset: this.page * this.pageSize 
+        });
+        
+        if (!result || result.length < this.pageSize) {
+          this.hasMore = false;
+        }
+        
+        this.isLoadingMore = false;
+      }
+    },
+    
+    async viewThread(post) {
+      this.currentView = 'thread';
+      
+      // Load thread
+      const thread = await this.fetchThread(post.id);
+      this.currentThread = thread;
+    },
+    
+    replyToPost(post) {
+      this.replyingTo = post;
+      this.showCreatePost = true;
+      
+      // Focus input after dialog opens
+      this.$nextTick(() => {
+        if (this.$refs.postInput) {
+          this.$refs.postInput.focus();
+        }
+      });
+    },
+    
+    async handleLike(postId) {
+      await this.likePost(postId);
+    },
+    
+    async handleRepost(postId) {
+      await this.repostPost(postId);
+    },
+    
+    async createPost() {
+      if (!this.canPost) return;
+      
+      this.isPosting = true;
       
       try {
-        const result = await store.dispatch('apps/postChirp', {
-          content: newChirp.value.trim()
-        })
+        const postData = {
+          content: this.newPostContent.trim()
+        };
+        
+        // If replying, add parent ID
+        if (this.replyingTo) {
+          postData.parentId = this.replyingTo.id;
+        }
+        
+        const result = await this.createChirperPost(postData);
         
         if (result.success) {
-          newChirp.value = ''
-          charCount.value = 0
+          this.closeCreatePost();
+          
+          // Reload feed or thread
+          if (this.currentView === 'thread' && this.replyingTo) {
+            await this.viewThread(this.replyingTo);
+          } else {
+            await this.loadFeed();
+          }
           
           // Show notification
-          store.dispatch('phone/showNotification', {
+          this.$store.dispatch('phone/showNotification', {
             type: 'success',
-            title: 'Chirp Posted',
-            message: 'Your chirp has been published'
-          })
-        } else {
-          postError.value = result.message || 'Failed to post chirp'
+            title: 'Posted',
+            message: this.replyingTo ? 'Your reply has been posted' : 'Your chirp has been posted'
+          });
         }
       } catch (error) {
-        console.error('Post chirp error:', error)
-        postError.value = 'An error occurred while posting'
+        console.error('Create post error:', error);
       } finally {
-        isPosting.value = false
+        this.isPosting = false;
       }
-    }
+    },
     
-    const handleLikeChirp = async (chirpId) => {
-      try {
-        await store.dispatch('apps/likeChirp', { chirpId: chirpId })
-      } catch (error) {
-        console.error('Like chirp error:', error)
+    closeCreatePost() {
+      this.showCreatePost = false;
+      this.newPostContent = '';
+      this.charCount = 0;
+      this.replyingTo = null;
+    },
+    
+    updateCharCount() {
+      this.charCount = this.newPostContent.length;
+    },
+    
+    filterByHashtag(hashtag) {
+      this.hashtagFilter = hashtag;
+      this.page = 0;
+      this.hasMore = true;
+    },
+    
+    goBack() {
+      if (this.currentView === 'thread') {
+        this.currentView = 'feed';
+        this.currentThread = null;
       }
-    }
+    },
     
-    onMounted(async () => {
-      isLoading.value = true
-      try {
-        await store.dispatch('apps/fetchChirperFeed')
-      } catch (error) {
-        console.error('Error loading chirper feed:', error)
-      } finally {
-        isLoading.value = false
+    getInitials(name) {
+      if (!name) return '?';
+      const parts = name.split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
       }
-    })
+      return name.substring(0, 2).toUpperCase();
+    },
     
-    return {
-      newChirp,
-      charCount,
-      isPosting,
-      isLoading,
-      postError,
-      activeTab,
-      currentFeed,
-      canPost,
-      updateCharCount,
-      getInitials,
-      formatTime,
-      handlePostChirp,
-      handleLikeChirp
+    formatTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}d`;
+      
+      return date.toLocaleDateString();
+    },
+    
+    formatCount(count) {
+      if (!count) return '';
+      if (count < 1000) return count.toString();
+      if (count < 1000000) return (count / 1000).toFixed(1) + 'K';
+      return (count / 1000000).toFixed(1) + 'M';
+    },
+    
+    formatContent(content) {
+      if (!content) return '';
+      
+      // Convert hashtags to clickable links
+      let formatted = content.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>');
+      
+      // Convert mentions to clickable links
+      formatted = formatted.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+      
+      // Convert URLs to clickable links
+      formatted = formatted.replace(
+        /(https?:\/\/[^\s]+)/g, 
+        '<a href="$1" target="_blank" class="link">$1</a>'
+      );
+      
+      return formatted;
     }
   }
-}
+};
 </script>
 
 <style scoped>
 .chirper-app {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  background: #000;
-  color: #fff;
-  overflow: hidden;
+  height: 100%;
+  background: var(--background-color);
 }
 
-.create-post-section {
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.chirp-input {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 15px;
-  font-family: inherit;
-  resize: none;
-  transition: all 0.2s;
-}
-
-.chirp-input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: #1da1f2;
-}
-
-.chirp-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.chirp-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.post-actions {
+.chirper-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
+  padding: 1rem;
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.char-count {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  transition: color 0.2s;
-}
-
-.char-count.warning {
-  color: #ff9500;
-}
-
-.char-count.error {
-  color: #ff3b30;
-  font-weight: 600;
-}
-
-.post-button {
-  padding: 8px 24px;
-  background: #1da1f2;
-  border: none;
-  border-radius: 20px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.post-button:hover:not(:disabled) {
-  background: #1a8cd8;
-}
-
-.post-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.error-message {
-  margin-top: 12px;
-  padding: 10px;
-  background: rgba(255, 59, 48, 0.2);
-  border: 1px solid rgba(255, 59, 48, 0.4);
-  border-radius: 6px;
-  color: #ff3b30;
-  font-size: 13px;
-}
-
-.feed-tabs {
+.header-left {
   display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.tab-button {
-  flex: 1;
-  padding: 14px;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+.header-left h1 {
+  font-size: 1.5rem;
   font-weight: 600;
+  margin: 0;
+  color: #1DA1F2;
+}
+
+.header-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.back-btn, .create-btn, .close-btn, .refresh-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1.25rem;
   cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
+  padding: 0.5rem;
 }
 
-.tab-button:hover {
-  background: rgba(255, 255, 255, 0.05);
+.create-btn {
+  color: #1DA1F2;
 }
 
-.tab-button.active {
-  color: #1da1f2;
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-color);
+  opacity: 0.6;
 }
 
-.tab-button.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: #1da1f2;
-  border-radius: 3px 3px 0 0;
+.loading i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feed-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 .feed-container {
   flex: 1;
   overflow-y: auto;
+  border-right: 1px solid var(--border-color);
 }
 
-.loading-state,
 .empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 14px;
+  padding: 3rem 1rem;
+  color: var(--text-color);
+  opacity: 0.6;
 }
 
-.chirp-list {
-  display: flex;
-  flex-direction: column;
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #1DA1F2;
 }
 
-.chirp-item {
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.empty-state .hint {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.post-item {
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem;
+  cursor: pointer;
   transition: background 0.2s;
 }
 
-.chirp-item:hover {
-  background: rgba(255, 255, 255, 0.02);
+.post-item:hover {
+  background: var(--background-color);
 }
 
-.chirp-header {
+.post-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
 .author-info {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   align-items: center;
 }
 
@@ -407,149 +621,382 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: white;
   flex-shrink: 0;
 }
 
 .author-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.25rem;
 }
 
 .author-name {
-  font-size: 15px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-color);
 }
 
-.author-number {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+.post-time {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.6;
 }
 
-.chirp-time {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.chirp-content {
-  font-size: 15px;
+.post-content {
+  color: var(--text-color);
   line-height: 1.5;
-  color: #fff;
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.post-content p {
+  margin: 0;
   word-wrap: break-word;
 }
 
-.chirp-actions {
-  display: flex;
-  gap: 16px;
+.post-content :deep(.hashtag) {
+  color: #1DA1F2;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.action-button {
+.post-content :deep(.mention) {
+  color: #1DA1F2;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.post-content :deep(.link) {
+  color: #1DA1F2;
+  text-decoration: none;
+}
+
+.post-content :deep(.link):hover {
+  text-decoration: underline;
+}
+
+.post-actions {
+  display: flex;
+  gap: 2rem;
+  padding-top: 0.5rem;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.6;
+  font-size: 1rem;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 16px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 13px;
-  cursor: pointer;
+  gap: 0.5rem;
   transition: all 0.2s;
 }
 
-.action-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.action-btn:hover {
+  opacity: 1;
 }
 
-.like-button.liked {
-  color: #ff3b30;
+.action-btn span {
+  font-size: 0.9rem;
 }
 
-.like-button.liked svg {
-  fill: #ff3b30;
+.reply-btn:hover {
+  color: #1DA1F2;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1600px) and (max-height: 900px) {
-  .create-post-section {
-    padding: 14px;
-  }
-  
-  .chirp-input {
-    min-height: 70px;
-    font-size: 14px;
-  }
-  
-  .chirp-item {
-    padding: 14px;
-  }
-  
-  .author-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 13px;
-  }
+.repost-btn:hover {
+  color: #17BF63;
 }
 
-@media (max-width: 1366px) and (max-height: 768px) {
-  .create-post-section {
-    padding: 12px;
+.repost-btn.reposted {
+  color: #17BF63;
+  opacity: 1;
+}
+
+.like-btn:hover {
+  color: #E0245E;
+}
+
+.like-btn.liked {
+  color: #E0245E;
+  opacity: 1;
+}
+
+/* Trending Sidebar */
+.trending-sidebar {
+  width: 300px;
+  background: var(--card-background);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.trending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trending-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-color);
+}
+
+.no-trending {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.trending-list {
+  padding: 0.5rem 0;
+}
+
+.trending-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.trending-item:hover {
+  background: var(--background-color);
+}
+
+.trending-rank {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1DA1F2;
+  width: 30px;
+  text-align: center;
+}
+
+.trending-info {
+  flex: 1;
+}
+
+.trending-hashtag {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.trending-count {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+/* Thread View */
+.thread-view {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.thread-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.main-post {
+  background: var(--card-background);
+  border-bottom: 2px solid var(--border-color);
+  padding: 1.5rem;
+}
+
+.replies-section {
+  padding: 1rem;
+}
+
+.replies-section h3 {
+  margin: 0 0 1rem;
+  padding: 0 0.5rem;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.no-replies {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.reply-item {
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem;
+}
+
+.reply-header {
+  margin-bottom: 0.75rem;
+}
+
+.reply-content {
+  color: var(--text-color);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  padding-left: 3rem;
+}
+
+.reply-content p {
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.reply-actions {
+  display: flex;
+  gap: 2rem;
+  padding-left: 3rem;
+}
+
+/* Dialogs */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.create-post-dialog {
+  background: var(--card-background);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-width: 500px;
+  max-width: 90%;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dialog-header h3 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.dialog-content {
+  margin-bottom: 1rem;
+}
+
+.replying-to {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--background-color);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.replying-to i {
+  color: #1DA1F2;
+}
+
+.post-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.char-count {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.char-count.warning {
+  color: #FFAD1F;
+  opacity: 1;
+}
+
+.char-count.error {
+  color: #E0245E;
+  opacity: 1;
+  font-weight: 600;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.cancel-btn, .post-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.cancel-btn {
+  background: var(--border-color);
+  color: var(--text-color);
+}
+
+.post-btn {
+  background: #1DA1F2;
+  color: white;
+}
+
+.post-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .feed-layout {
+    flex-direction: column;
   }
   
-  .chirp-input {
-    min-height: 60px;
-    font-size: 13px;
-    padding: 10px;
+  .trending-sidebar {
+    width: 100%;
+    max-height: 200px;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
   }
   
-  .post-actions {
-    margin-top: 10px;
-  }
-  
-  .char-count {
-    font-size: 12px;
-  }
-  
-  .post-button {
-    padding: 6px 20px;
-    font-size: 13px;
-  }
-  
-  .tab-button {
-    padding: 12px;
-    font-size: 13px;
-  }
-  
-  .chirp-item {
-    padding: 12px;
-  }
-  
-  .author-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-  
-  .author-name {
-    font-size: 14px;
-  }
-  
-  .author-number,
-  .chirp-time {
-    font-size: 12px;
-  }
-  
-  .chirp-content {
-    font-size: 14px;
+  .create-post-dialog {
+    min-width: 90%;
   }
 }
 </style>

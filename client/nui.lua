@@ -1771,3 +1771,770 @@ RegisterNUICallback('uninstallApp', function(data, cb)
         cb({ success = false, message = 'Request timeout' })
     end
 end)
+
+
+-- Chirper App Callbacks
+
+-- Get Chirper feed
+RegisterNUICallback('getChirperFeed', function(data, cb)
+    local limit = data.limit or 20
+    local offset = data.offset or 0
+    
+    TriggerServerEvent('phone:server:getChirperFeed', {
+        limit = limit,
+        offset = offset
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local feedData = {}
+    
+    local function onReceiveFeed(result)
+        feedData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveChirperFeed', onReceiveFeed)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(feedData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get user's own Chirper posts
+RegisterNUICallback('getMyChirperPosts', function(data, cb)
+    TriggerServerEvent('phone:server:getMyChirperPosts')
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local postsData = {}
+    
+    local function onReceivePosts(result)
+        postsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveMyChirperPosts', onReceivePosts)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(postsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get Chirper trending topics
+RegisterNUICallback('getChirperTrending', function(data, cb)
+    TriggerServerEvent('phone:server:getChirperTrending')
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local trendingData = {}
+    
+    local function onReceiveTrending(result)
+        trendingData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveChirperTrending', onReceiveTrending)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(trendingData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get Chirper thread (post + replies)
+RegisterNUICallback('getChirperThread', function(data, cb)
+    if not data.postId then
+        cb({ success = false, message = 'Post ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:getChirperThread', {
+        postId = data.postId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local threadData = {}
+    
+    local function onReceiveThread(result)
+        threadData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveChirperThread', onReceiveThread)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(threadData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create Chirper post
+RegisterNUICallback('createChirperPost', function(data, cb)
+    if not data.content then
+        cb({ success = false, message = 'Content is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createChirperPost', {
+        content = data.content,
+        parentId = data.parentId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onPostResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:createChirperPostResult', onPostResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Like Chirper post
+RegisterNUICallback('likeChirperPost', function(data, cb)
+    if not data.postId then
+        cb({ success = false, message = 'Post ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:likeChirperPost', {
+        postId = data.postId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onLikeResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:likeChirperPostResult', onLikeResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Repost Chirper post
+RegisterNUICallback('repostChirperPost', function(data, cb)
+    if not data.postId then
+        cb({ success = false, message = 'Post ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:repostChirperPost', {
+        postId = data.postId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onRepostResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:repostChirperPostResult', onRepostResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Reply to Chirper post
+RegisterNUICallback('replyToChirperPost', function(data, cb)
+    if not data.postId or not data.content then
+        cb({ success = false, message = 'Post ID and content are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createChirperPost', {
+        content = data.content,
+        parentId = data.postId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onReplyResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:createChirperPostResult', onReplyResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Delete Chirper post
+RegisterNUICallback('deleteChirperPost', function(data, cb)
+    if not data.postId then
+        cb({ success = false, message = 'Post ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:deleteChirperPost', {
+        postId = data.postId
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onDeleteResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:deleteChirperPostResult', onDeleteResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Handle new Chirper post broadcast
+RegisterNetEvent('phone:client:newChirperPost', function(post)
+    if not post then
+        return
+    end
+    
+    -- Send to NUI to update feed
+    SendNUIMessage({
+        action = 'newChirperPost',
+        data = post
+    })
+end)
+
+-- Handle Chirper post like update broadcast
+RegisterNetEvent('phone:client:chirperPostLikeUpdate', function(data)
+    if not data or not data.postId then
+        return
+    end
+    
+    -- Send to NUI to update like count
+    SendNUIMessage({
+        action = 'chirperPostLikeUpdate',
+        data = data
+    })
+end)
+
+-- Handle Chirper post repost update broadcast
+RegisterNetEvent('phone:client:chirperPostRepostUpdate', function(data)
+    if not data or not data.postId then
+        return
+    end
+    
+    -- Send to NUI to update repost count
+    SendNUIMessage({
+        action = 'chirperPostRepostUpdate',
+        data = data
+    })
+end)
+
+-- Handle Chirper post reply update broadcast
+RegisterNetEvent('phone:client:chirperPostReplyUpdate', function(data)
+    if not data or not data.postId then
+        return
+    end
+    
+    -- Send to NUI to update reply count
+    SendNUIMessage({
+        action = 'chirperPostReplyUpdate',
+        data = data
+    })
+end)
+
+-- Handle Chirper post deleted broadcast
+RegisterNetEvent('phone:client:chirperPostDeleted', function(data)
+    if not data or not data.postId then
+        return
+    end
+    
+    -- Send to NUI to remove post from feed
+    SendNUIMessage({
+        action = 'chirperPostDeleted',
+        data = data
+    })
+end)
+
+
+-- Modish App Callbacks
+
+-- Get Modish feed
+RegisterNUICallback('getModishFeed', function(data, cb)
+    TriggerServerEvent('phone:server:getModishFeed', data)
+    cb({ success = true })
+end)
+
+-- Get my Modish videos
+RegisterNUICallback('getMyModishVideos', function(data, cb)
+    TriggerServerEvent('phone:server:getMyModishVideos')
+    cb({ success = true })
+end)
+
+-- Create Modish video
+RegisterNUICallback('createModishVideo', function(data, cb)
+    TriggerServerEvent('phone:server:createModishVideo', data)
+    cb({ success = true })
+end)
+
+-- Like Modish video
+RegisterNUICallback('likeModishVideo', function(data, cb)
+    TriggerServerEvent('phone:server:likeModishVideo', data)
+    cb({ success = true })
+end)
+
+-- Increment Modish video views
+RegisterNUICallback('incrementModishViews', function(data, cb)
+    TriggerServerEvent('phone:server:incrementModishViews', data)
+    cb({ success = true })
+end)
+
+-- Get Modish comments
+RegisterNUICallback('getModishComments', function(data, cb)
+    TriggerServerEvent('phone:server:getModishComments', data)
+    cb({ success = true })
+end)
+
+-- Comment on Modish video
+RegisterNUICallback('commentOnModishVideo', function(data, cb)
+    TriggerServerEvent('phone:server:commentOnModishVideo', data)
+    cb({ success = true })
+end)
+
+-- Client event handlers for Modish responses
+RegisterNetEvent('phone:client:receiveModishFeed', function(data)
+    SendNUIMessage({
+        type = 'modishFeedReceived',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:receiveMyModishVideos', function(data)
+    SendNUIMessage({
+        type = 'myModishVideosReceived',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:createModishVideoResult', function(data)
+    SendNUIMessage({
+        type = 'modishVideoCreated',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:likeModishVideoResult', function(data)
+    SendNUIMessage({
+        type = 'modishVideoLiked',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:receiveModishComments', function(data)
+    SendNUIMessage({
+        type = 'modishCommentsReceived',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:commentOnModishVideoResult', function(data)
+    SendNUIMessage({
+        type = 'modishCommentPosted',
+        data = data
+    })
+end)
+
+-- Real-time updates
+RegisterNetEvent('phone:client:newModishVideo', function(video)
+    SendNUIMessage({
+        type = 'newModishVideo',
+        video = video
+    })
+end)
+
+RegisterNetEvent('phone:client:modishVideoLikeUpdate', function(data)
+    SendNUIMessage({
+        type = 'modishVideoLikeUpdate',
+        data = data
+    })
+end)
+
+RegisterNetEvent('phone:client:modishVideoViewUpdate', function(data)
+    SendNUIMessage({
+        type = 'modishVideoViewUpdate',
+        data = data
+    })
+end)
+
+
+
+-- Flicker App Callbacks
+
+-- Get Flicker profile
+RegisterNUICallback('getFlickerProfile', function(data, cb)
+    TriggerServerEvent('phone:server:getFlickerProfile')
+    
+    local timeout = 0
+    local responseReceived = false
+    local profileData = {}
+    
+    local function onReceiveProfile(result)
+        profileData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveFlickerProfile', onReceiveProfile)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(profileData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Save Flicker profile
+RegisterNUICallback('saveFlickerProfile', function(data, cb)
+    TriggerServerEvent('phone:server:saveFlickerProfile', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onSaveResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:saveFlickerProfileResult', onSaveResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get potential matches
+RegisterNUICallback('getFlickerPotentialMatches', function(data, cb)
+    TriggerServerEvent('phone:server:getFlickerPotentialMatches', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local matchesData = {}
+    
+    local function onReceiveMatches(result)
+        matchesData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveFlickerPotentialMatches', onReceiveMatches)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(matchesData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Swipe on profile
+RegisterNUICallback('swipeFlickerProfile', function(data, cb)
+    TriggerServerEvent('phone:server:swipeFlickerProfile', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onSwipeResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:swipeFlickerProfileResult', onSwipeResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get matches
+RegisterNUICallback('getFlickerMatches', function(data, cb)
+    TriggerServerEvent('phone:server:getFlickerMatches')
+    
+    local timeout = 0
+    local responseReceived = false
+    local matchesData = {}
+    
+    local function onReceiveMatches(result)
+        matchesData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveFlickerMatches', onReceiveMatches)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(matchesData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Unmatch
+RegisterNUICallback('unmatchFlicker', function(data, cb)
+    TriggerServerEvent('phone:server:unmatchFlicker', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUnmatchResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:unmatchFlickerResult', onUnmatchResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get messages with a match
+RegisterNUICallback('getFlickerMessages', function(data, cb)
+    TriggerServerEvent('phone:server:getFlickerMessages', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local messagesData = {}
+    
+    local function onReceiveMessages(result)
+        messagesData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveFlickerMessages', onReceiveMessages)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(messagesData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Send message to match
+RegisterNUICallback('sendFlickerMessage', function(data, cb)
+    TriggerServerEvent('phone:server:sendFlickerMessage', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onSendResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:sendFlickerMessageResult', onSendResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Handle real-time match notification
+RegisterNetEvent('phone:client:newFlickerMatch', function(matchData)
+    SendNUIMessage({
+        action = 'newFlickerMatch',
+        data = matchData
+    })
+end)
+
+-- Handle real-time message notification
+RegisterNetEvent('phone:client:newFlickerMessage', function(messageData)
+    SendNUIMessage({
+        action = 'newFlickerMessage',
+        data = messageData
+    })
+end)
+
+-- Handle unmatch notification
+RegisterNetEvent('phone:client:flickerUnmatched', function(data)
+    SendNUIMessage({
+        action = 'flickerUnmatched',
+        data = data
+    })
+end)
