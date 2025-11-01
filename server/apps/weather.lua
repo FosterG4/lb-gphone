@@ -76,15 +76,37 @@ local function GetCurrentGameWeather()
     -- Try to get weather from common weather resources
     local weather = nil
     
-    -- Try qb-weathersync
+    -- Try qb-weathersync (check for correct export name)
     if GetResourceState('qb-weathersync') == 'started' then
-        weather = exports['qb-weathersync']:getWeather()
+        -- Try different export names that qb-weathersync might use
+        local success, result = pcall(function()
+            return exports['qb-weathersync']:getWeather()
+        end)
+        if not success then
+            -- Try alternative export name
+            success, result = pcall(function()
+                return exports['qb-weathersync']:getCurrentWeather()
+            end)
+        end
+        if success and result then
+            weather = result
+        end
     -- Try cd_easytime
     elseif GetResourceState('cd_easytime') == 'started' then
-        weather = exports['cd_easytime']:GetWeather()
+        local success, result = pcall(function()
+            return exports['cd_easytime']:GetWeather()
+        end)
+        if success and result then
+            weather = result
+        end
     -- Try vSync
     elseif GetResourceState('vSync') == 'started' then
-        weather = exports['vSync']:getCurrentWeather()
+        local success, result = pcall(function()
+            return exports['vSync']:getCurrentWeather()
+        end)
+        if success and result then
+            weather = result
+        end
     end
     
     -- If we got weather data, use it

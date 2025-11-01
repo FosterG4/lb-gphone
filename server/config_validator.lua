@@ -147,14 +147,14 @@ function ConfigValidator.ValidateCurrencyConfiguration()
         return false
     end
     
-    -- Skip validation if currency system is disabled or maxValue is not set
+    -- Skip validation if currency system is disabled
     if Config.Currency.enabled == false then
         return true
     end
     
-    -- Skip validation if Currency table is not properly loaded
-    if not Config.Currency.maxValue and not Config.Currency.enabled then
-        AddWarning('Config.Currency is not fully configured, skipping currency validation')
+    -- Check if Currency table is properly loaded
+    if not Config.Currency.maxValue then
+        AddWarning('Config.Currency.maxValue is not defined, skipping currency validation')
         return true
     end
     

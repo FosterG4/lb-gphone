@@ -140,8 +140,15 @@ end
 function InstallationManager:DetectFramework()
     PrintHeader('Detecting Framework')
     
-    -- If framework is already explicitly set and not standalone, verify it exists
-    if Config.Framework and Config.Framework ~= 'standalone' then
+    -- If framework is explicitly set to standalone, skip detection
+    if Config.Framework == 'standalone' then
+        PrintInfo('Framework explicitly set to: standalone')
+        PrintSuccess('Using standalone mode (no framework integration)')
+        return true
+    end
+    
+    -- If framework is already explicitly set and not auto, verify it exists
+    if Config.Framework and Config.Framework ~= 'auto' then
         PrintInfo('Framework explicitly set to: ' .. Config.Framework)
         
         local frameworkResources = {
@@ -160,7 +167,7 @@ function InstallationManager:DetectFramework()
         end
     end
     
-    -- Auto-detect framework
+    -- Auto-detect framework (only if set to 'auto' or verification failed)
     local frameworks = {
         {name = 'es_extended', type = 'esx', description = 'ESX Framework'},
         {name = 'qb-core', type = 'qbcore', description = 'QBCore Framework'},

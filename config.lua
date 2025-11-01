@@ -2,7 +2,9 @@ Config = {}
 
 -- Framework Configuration
 -- Options: 'standalone', 'esx', 'qbcore', 'qbox'
-Config.Framework = 'standalone'
+-- Set to 'standalone' to disable framework integration
+-- Set to 'auto' to enable automatic framework detection
+Config.Framework = 'auto'
 
 -- Keybind Configuration
 Config.OpenKey = 'M' -- Key to open/close phone

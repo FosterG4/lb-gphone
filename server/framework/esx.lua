@@ -9,16 +9,20 @@ ESX.Framework = nil
 function ESX:new()
     local self = setmetatable({}, ESX)
     
-    -- Try to get ESX shared object
-    self.Framework = exports['es_extended']:getSharedObject()
+    -- Try to get ESX shared object with error handling
+    local success, result = pcall(function()
+        return exports['es_extended']:getSharedObject()
+    end)
     
-    if not self.Framework then
-        print('[Phone] ^1ERROR: Failed to load ESX framework^7')
-        return nil
+    if success and result then
+        self.Framework = result
+        print('[Phone] Initialized ESX framework adapter')
+        return self
     end
     
-    print('[Phone] Initialized ESX framework adapter')
-    return self
+    print('[Phone] ^1ERROR: Failed to load ESX framework^7')
+    print('[Phone] ^3Make sure es_extended resource is started before lb-gphone^7')
+    return nil
 end
 
 --- Get player object from source

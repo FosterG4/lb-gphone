@@ -200,8 +200,12 @@ function Database.CreateTables()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]], {})
     
+    -- Wait for phone_chirps table to be created before creating dependent table
+    Wait(100)
+    
     -- Table 5b: phone_chirp_likes (for tracking who liked which chirps)
     -- SQL File: server/sql/phone_chirper_tables.sql
+    -- Note: This table depends on phone_chirps existing first
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_chirp_likes (
             id INT AUTO_INCREMENT PRIMARY KEY,

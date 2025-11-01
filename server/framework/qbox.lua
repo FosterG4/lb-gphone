@@ -13,25 +13,38 @@ function Qbox:new()
     -- Instead, it uses a global QBX object or direct exports
     -- Try multiple methods to get Qbox
     
-    -- Method 1: Try global QBX
-    if QBX then
-        self.Framework = QBX
+    -- Method 1: Try global QBX (most common in newer Qbox)
+    local success, result = pcall(function()
+        return _G.QBX
+    end)
+    if success and result then
+        self.Framework = result
         print('[Phone] Initialized Qbox framework adapter (via global QBX)')
         return self
     end
     
-    -- Method 2: Try exports (some Qbox versions)
-    local success, result = pcall(function()
+    -- Method 2: Try exports.qbx_core
+    success, result = pcall(function()
         return exports.qbx_core:GetCoreObject()
     end)
-    
     if success and result then
         self.Framework = result
-        print('[Phone] Initialized Qbox framework adapter (via export)')
+        print('[Phone] Initialized Qbox framework adapter (via qbx_core export)')
+        return self
+    end
+    
+    -- Method 3: Try exports['qbx-core'] (alternative naming)
+    success, result = pcall(function()
+        return exports['qbx-core']:GetCoreObject()
+    end)
+    if success and result then
+        self.Framework = result
+        print('[Phone] Initialized Qbox framework adapter (via qbx-core export)')
         return self
     end
     
     print('[Phone] ^1ERROR: Failed to load Qbox framework^7')
+    print('[Phone] ^3Make sure qbx_core resource is started before lb-gphone^7')
     return nil
 end
 
