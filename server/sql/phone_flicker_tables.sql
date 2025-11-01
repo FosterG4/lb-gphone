@@ -57,8 +57,7 @@ CREATE TABLE IF NOT EXISTS phone_flicker_matches (
     INDEX idx_matched (matched_at DESC),
     INDEX idx_unmatched (unmatched),
     FOREIGN KEY (player1_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
-    FOREIGN KEY (player2_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
-    CONSTRAINT check_different_players CHECK (player1_number < player2_number)
+    FOREIGN KEY (player2_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: phone_flicker_messages

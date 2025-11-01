@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS phone_marketplace_reviews (
     transaction_id INT NOT NULL COMMENT 'Reference to the transaction being reviewed',
     reviewer_number VARCHAR(20) NOT NULL COMMENT 'Phone number of person leaving review',
     reviewed_number VARCHAR(20) NOT NULL COMMENT 'Phone number of person being reviewed',
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5) COMMENT 'Rating from 1 to 5 stars',
+    rating INT NOT NULL COMMENT 'Rating from 1 to 5 stars',
     review_text TEXT COMMENT 'Written review content (optional)',
     review_type ENUM('buyer', 'seller') NOT NULL COMMENT 'Whether reviewing as buyer or seller',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'When review was submitted',

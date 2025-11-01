@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS phone_page_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'Unique review identifier',
     page_id INT NOT NULL COMMENT 'Reference to the business page',
     reviewer_number VARCHAR(20) NOT NULL COMMENT 'Phone number of reviewer',
-    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5) COMMENT 'Rating from 1 to 5 stars',
+    rating INT NOT NULL COMMENT 'Rating from 1 to 5 stars',
     review_text TEXT COMMENT 'Written review content (optional)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'When review was submitted',
     
