@@ -69,8 +69,6 @@ import Contacts from "../views/Contacts.vue";
 import Messages from "../views/Messages.vue";
 import Dialer from "../views/Dialer.vue";
 import CallScreen from "../views/CallScreen.vue";
-import Bank from "../apps/Bank.vue";
-import Bankr from "../apps/Bankr.vue";
 import Chirper from "../apps/Chirper.vue";
 import Settings from "../apps/Settings.vue";
 import Clock from "../apps/Clock.vue";
@@ -102,8 +100,6 @@ export default {
     Messages,
     Dialer,
     CallScreen,
-    Bank,
-    Bankr,
     Chirper,
     Settings,
     Clock,
@@ -140,8 +136,8 @@ export default {
       messages: Messages,
       dialer: Dialer,
       "call-screen": CallScreen,
-      bank: Bank,
-      bankr: Bankr,
+      bank: Wallet,
+      bankr: Wallet,
       chirper: Chirper,
       settings: Settings,
       clock: Clock,
