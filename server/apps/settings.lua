@@ -291,7 +291,7 @@ end
 -- Register server events
 RegisterNetEvent('phone:server:getSettings', function()
     local src = source
-    local phoneNumber = exports['your-phone-resource']:GetPlayerPhoneNumber(src)
+    local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:settingsError', src, 'Phone number not found')
@@ -309,7 +309,7 @@ end)
 
 RegisterNetEvent('phone:server:updateSettings', function(updates)
     local src = source
-    local phoneNumber = exports['your-phone-resource']:GetPlayerPhoneNumber(src)
+    local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:settingsError', src, 'Phone number not found')
@@ -332,7 +332,7 @@ end)
 
 RegisterNetEvent('phone:server:updateSetting', function(settingKey, settingValue)
     local src = source
-    local phoneNumber = exports['your-phone-resource']:GetPlayerPhoneNumber(src)
+    local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:settingsError', src, 'Phone number not found')
@@ -351,7 +351,7 @@ end)
 
 RegisterNetEvent('phone:server:setPlayerLocale', function(data)
     local src = source
-    local phoneNumber = exports['your-phone-resource']:GetPlayerPhoneNumber(src)
+    local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:localeUpdateResult', src, {
