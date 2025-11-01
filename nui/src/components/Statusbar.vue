@@ -109,12 +109,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px 8px 20px;
+  padding: var(--status-bar-padding-y) var(--status-bar-padding-x);
   background: transparent;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  height: 44px;
+  color: var(--status-bar-text-light);
+  font-size: var(--status-bar-font-size);
+  font-weight: var(--status-bar-font-weight);
+  height: var(--status-bar-height);
   position: relative;
   z-index: 1000;
 }
@@ -126,9 +126,9 @@ export default {
 }
 
 .time {
-  font-size: 16px;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: var(--status-bar-time-font-size);
+  font-weight: var(--status-bar-font-weight);
+  text-shadow: var(--status-bar-shadow);
 }
 
 .status-center {
@@ -139,10 +139,10 @@ export default {
 }
 
 .notch {
-  width: 120px;
-  height: 24px;
+  width: var(--status-bar-notch-width);
+  height: var(--status-bar-notch-height);
   background: #000;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 var(--status-bar-notch-radius) var(--status-bar-notch-radius);
   position: relative;
 }
 
@@ -151,21 +151,21 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: var(--status-bar-icon-gap);
 }
 
 .signal-bars {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
-  height: 12px;
+  gap: var(--status-bar-signal-bar-gap);
+  height: var(--status-bar-battery-height);
 }
 
 .bar {
-  width: 3px;
-  background: rgba(255, 255, 255, 0.3);
+  width: var(--status-bar-signal-bar-width);
+  background: rgba(255, 255, 255, var(--status-bar-inactive-opacity));
   border-radius: 1px;
-  transition: background 0.3s;
+  transition: background var(--status-bar-transition);
 }
 
 .bar:nth-child(1) { height: 3px; }
@@ -174,118 +174,72 @@ export default {
 .bar:nth-child(4) { height: 12px; }
 
 .bar.active {
-  background: white;
+  background: var(--status-bar-text-light);
 }
 
 .wifi-icon {
-  color: rgba(255, 255, 255, 0.3);
-  transition: color 0.3s;
+  color: rgba(255, 255, 255, var(--status-bar-inactive-opacity));
+  transition: color var(--status-bar-transition);
 }
 
 .wifi-icon.connected {
-  color: white;
+  color: var(--status-bar-text-light);
 }
 
 .battery {
   position: relative;
-  width: 24px;
-  height: 12px;
-  border: 1px solid white;
+  width: var(--status-bar-battery-width);
+  height: var(--status-bar-battery-height);
+  border: 1px solid var(--status-bar-text-light);
   border-radius: 2px;
   background: transparent;
 }
 
 .battery-level {
   height: 100%;
-  background: white;
+  background: var(--status-bar-text-light);
   border-radius: 1px;
-  transition: width 0.3s;
+  transition: width var(--status-bar-transition);
 }
 
 .battery-tip {
   position: absolute;
   right: -3px;
   top: 3px;
-  width: 2px;
-  height: 6px;
-  background: white;
+  width: var(--status-bar-battery-tip-width);
+  height: var(--status-bar-battery-tip-height);
+  background: var(--status-bar-text-light);
   border-radius: 0 1px 1px 0;
 }
 
 .battery-percentage {
-  font-size: 12px;
+  font-size: var(--status-bar-battery-font-size);
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: var(--status-bar-shadow);
 }
 
-/* Dark theme support */
-.dark .status-bar {
-  color: white;
-}
-
+/* Theme support */
 .light .status-bar {
-  color: #1c1c1e;
+  color: var(--status-bar-text-dark);
 }
 
 .light .bar.active {
-  background: #1c1c1e;
+  background: var(--status-bar-text-dark);
 }
 
 .light .wifi-icon.connected {
-  color: #1c1c1e;
+  color: var(--status-bar-text-dark);
 }
 
 .light .battery {
-  border-color: #1c1c1e;
+  border-color: var(--status-bar-text-dark);
 }
 
 .light .battery-level {
-  background: #1c1c1e;
+  background: var(--status-bar-text-dark);
 }
 
 .light .battery-tip {
-  background: #1c1c1e;
-}
-
-/* Responsive design */
-@media (max-width: 1600px) and (max-height: 900px) {
-  .status-bar {
-    padding: 6px 18px;
-    height: 40px;
-  }
-
-  .time {
-    font-size: 15px;
-  }
-
-  .notch {
-    width: 110px;
-    height: 22px;
-  }
-}
-
-@media (max-width: 1366px) and (max-height: 768px) {
-  .status-bar {
-    padding: 4px 16px;
-    height: 36px;
-  }
-
-  .time {
-    font-size: 14px;
-  }
-
-  .notch {
-    width: 100px;
-    height: 20px;
-  }
-
-  .battery {
-    width: 20px;
-    height: 10px;
-  }
-
-  .battery-percentage {
-    font-size: 11px;
-  }
+  background: var(--status-bar-text-dark);
 }
 </style>
