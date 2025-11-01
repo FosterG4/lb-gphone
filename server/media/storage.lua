@@ -1614,8 +1614,6 @@ function Storage.CleanupOrphanedMedia(days)
     }
 end
 
-return Storage
-
 -- Test command to verify database integration for Fivemanage URLs
 RegisterCommand('phone:test-db-integration', function(source, args)
     if source ~= 0 then
@@ -1777,3 +1775,5 @@ RegisterCommand('phone:test-db-integration', function(source, args)
     print('[Phone] All tests passed successfully.')
     print('[Phone] ========================================')
 end, true)
+
+return Storage
