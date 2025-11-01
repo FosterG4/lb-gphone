@@ -147,15 +147,25 @@ function ConfigValidator.ValidateCurrencyConfiguration()
         return false
     end
     
-    -- Skip validation if currency system is disabled
+    -- Skip validation if currency system is disabled or maxValue is not set
     if Config.Currency.enabled == false then
         return true
     end
     
-    -- Validate maxValue
+    -- Debug: Print what we actually have
+    print('[Phone Config] DEBUG: Config.Currency.enabled = ' .. tostring(Config.Currency.enabled))
+    t('[Phone Config] DEBUG: Config.Currency.maxValue = ' .. tostring(Config.Currency.maxValue))
+    print('[Phone Config] DEBUG: Config.Currency type = ' .. type(Config.Currency))
+    
+    -- Validate maxValue (optional if currency is disabled)
     if not Config.Currency.maxValue then
-        AddError('Config.Currency.maxValue is not defined')
-        return false
+        if Config.Currency.enabled == true then
+            AddError('Config.Currency.maxValue is not defined but currency is enabled')
+            return false
+        end
+        -- If enabled is nil/not set, just warn and continue
+        AddWarning('Config.Currency.maxValue is not defined, currency features may not work')
+        return true
     end
     
     if type(Config.Currency.maxValue) ~= 'number' then

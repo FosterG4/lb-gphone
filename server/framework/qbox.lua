@@ -9,17 +9,30 @@ Qbox.Framework = nil
 function Qbox:new()
     local self = setmetatable({}, Qbox)
     
-    -- Try to get Qbox shared object
-    -- Qbox uses 'qbx_core' as the resource name
-    self.Framework = exports.qbx_core:GetCoreObject()
+    -- Qbox doesn't use exports like QBCore
+    -- Instead, it uses a global QBX object or direct exports
+    -- Try multiple methods to get Qbox
     
-    if not self.Framework then
-        print('[Phone] ^1ERROR: Failed to load Qbox framework^7')
-        return nil
+    -- Method 1: Try global QBX
+    if QBX then
+        self.Framework = QBX
+        print('[Phone] Initialized Qbox framework adapter (via global QBX)')
+        return self
     end
     
-    print('[Phone] Initialized Qbox framework adapter')
-    return self
+    -- Method 2: Try exports (some Qbox versions)
+    local success, result = pcall(function()
+        return exports.qbx_core:GetCoreObject()
+    end)
+    
+    if success and result then
+        self.Framework = result
+        print('[Phone] Initialized Qbox framework adapter (via export)')
+        return self
+    end
+    
+    print('[Phone] ^1ERROR: Failed to load Qbox framework^7')
+    return nil
 end
 
 --- Get player object from source
