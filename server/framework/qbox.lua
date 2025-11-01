@@ -17,12 +17,19 @@ end
 function Qbox:new()
     local self = setmetatable({}, Qbox)
     
+    -- Check if qbx_core resource is started
+    if GetResourceState('qbx_core') ~= 'started' then
+        print('[Phone] ^1ERROR: qbx_core resource is not started^7')
+        print('[Phone] ^3Make sure qbx_core is loaded before lb-gphone in server.cfg^7')
+        return nil
+    end
+    
     -- Qbox doesn't use exports like QBCore
     -- Instead, it uses a global QBX object or direct exports
     -- Try multiple methods to get Qbox with retries for timing issues
     
-    local maxRetries = 5
-    local retryDelay = 100 -- milliseconds
+    local maxRetries = 30
+    local retryDelay = 200 -- milliseconds
     
     for attempt = 1, maxRetries do
         -- Method 1: Try global QBX (most common in newer Qbox)
@@ -31,7 +38,7 @@ function Qbox:new()
         end)
         if success and result then
             self.Framework = result
-            print('[Phone] Initialized Qbox framework adapter (via global QBX)')
+            print('[Phone] Initialized Qbox framework adapter (via global QBX) after ' .. attempt .. ' attempt(s)')
             return self
         end
         
@@ -41,7 +48,7 @@ function Qbox:new()
         end)
         if success and result then
             self.Framework = result
-            print('[Phone] Initialized Qbox framework adapter (via qbx_core export)')
+            print('[Phone] Initialized Qbox framework adapter (via qbx_core export) after ' .. attempt .. ' attempt(s)')
             return self
         end
         
@@ -51,22 +58,24 @@ function Qbox:new()
         end)
         if success and result then
             self.Framework = result
-            print('[Phone] Initialized Qbox framework adapter (via qbx-core export)')
+            print('[Phone] Initialized Qbox framework adapter (via qbx-core export) after ' .. attempt .. ' attempt(s)')
             return self
         end
         
         -- If not found and not last attempt, wait and retry
         if attempt < maxRetries then
             if attempt == 1 then
-                print('[Phone] ^3Waiting for Qbox framework to initialize... (attempt ' .. attempt .. '/' .. maxRetries .. ')^7')
+                print('[Phone] ^3Waiting for Qbox framework to initialize...^7')
+            elseif attempt % 5 == 0 then
+                print('[Phone] ^3Still waiting... (attempt ' .. attempt .. '/' .. maxRetries .. ')^7')
             end
             Wait(retryDelay)
         end
     end
     
-    print('[Phone] ^1ERROR: Failed to load Qbox framework after ' .. maxRetries .. ' attempts^7')
-    print('[Phone] ^3Make sure qbx_core resource is started before lb-gphone^7')
-    print('[Phone] ^3Check your server.cfg load order: ensure qbx_core should come before ensure lb-gphone^7')
+    print('[Phone] ^1ERROR: Failed to load Qbox framework after ' .. maxRetries .. ' attempts (' .. (maxRetries * retryDelay / 1000) .. ' seconds)^7')
+    print('[Phone] ^3Qbox may still be initializing. This is usually a load order issue.^7')
+    print('[Phone] ^3Try adding a small delay before starting lb-gphone, or ensure qbx_core loads first.^7')
     return nil
 end
 

@@ -152,7 +152,7 @@ function ConfigValidator.ValidateCurrencyConfiguration()
         return true
     end
     
--- Check if Currency table is properly loaded
+    -- Check if Currency table is properly loaded
     -- Note: maxValue can be 0 (falsy) but still valid, so check for nil explicitly
     if Config.Currency.maxValue == nil then
         AddWarning('Config.Currency.maxValue is not defined, skipping currency validation')
