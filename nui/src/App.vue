@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import Phone from './components/Phone.vue'
 import Notification from './components/Notification.vue'
@@ -32,6 +32,21 @@ export default {
     const removeNotification = (id) => {
       store.commit('phone/removeNotification', id)
     }
+    
+    // Listen for phone-notification custom events
+    const handlePhoneNotification = (event) => {
+      if (event.detail) {
+        store.dispatch('phone/showNotification', event.detail)
+      }
+    }
+    
+    onMounted(() => {
+      window.addEventListener('phone-notification', handlePhoneNotification)
+    })
+    
+    onUnmounted(() => {
+      window.removeEventListener('phone-notification', handlePhoneNotification)
+    })
     
     return {
       isVisible,

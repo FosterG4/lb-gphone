@@ -1,375 +1,530 @@
-# FiveM Smartphone NUI
+# 📱 lb-gphone - FiveM Smartphone System
 
-A modern, feature-rich smartphone system with NUI interface for FiveM servers. Built with Vue.js and designed to be framework-agnostic with support for ESX, QBCore, Qbox, and standalone modes.
+<div align="center">
 
-## Features
+[![GitHub Repository](https://img.shields.io/badge/GitHub-lb--gphone-181717?style=for-the-badge&logo=github)](https://github.com/FosterG4/lb-gphone.git)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![FiveM](https://img.shields.io/badge/FiveM-Compatible-green.svg?style=for-the-badge&logo=fivem)](https://fivem.net/)
 
-- 📱 Modern smartphone interface built with Vue.js
-- 📞 Voice calls with pma-voice integration
-- 💬 Text messaging system with offline message queuing
-- 👥 Contact management with search functionality
-- 🏦 Banking app with transfers and transaction history
-- 🐦 Twitter/social media app with real-time feed updates
-- 💰 Cryptocurrency trading app with dynamic pricing
-- 🔧 Framework support (ESX, QBCore, Qbox, Standalone)
-- 💾 MySQL database persistence via oxmysql
-- 🔌 Extensible app module system
-- 🎨 Responsive UI design
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-4FC08D.svg?style=for-the-badge&logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-16+-339933.svg?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-Compatible-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com/)
 
-## Table of Contents
+---
 
-- [Dependencies](#dependencies)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Database Setup](#database-setup)
-- [Framework Integration](#framework-integration)
-- [Usage](#usage)
-- [Development](#development)
-- [Custom App Development](#custom-app-development)
-- [API Documentation](#api-documentation)
-- [Troubleshooting](#troubleshooting)
+### 🎯 A Modern, Feature-Rich Smartphone System for FiveM Servers
 
-## Dependencies
+**Built with Vue.js 3** • **Framework-Agnostic Design** • **23+ Fully Functional Apps**
 
-### Required
+Supports ESX, QBCore, Qbox, and Standalone modes with advanced features including voice calls, social media, banking with 999 trillion currency support, cryptocurrency trading, and cloud media storage.
 
-- **[oxmysql](https://github.com/overextended/oxmysql)** - Database operations
-  - Version: Latest recommended
-  - Used for all database queries and persistence
+---
 
-- **[pma-voice](https://github.com/AvarianKnight/pma-voice)** - Voice chat integration
-  - Version: Latest recommended
-  - Required for phone call voice functionality
+[📖 Documentation](docs/) • [🚀 Quick Start](#-installation) • [⚙️ Configuration](#configuration) • [🐛 Report Issues](https://github.com/FosterG4/lb-gphone/issues) • [💡 Feature Requests](https://github.com/FosterG4/lb-gphone/issues/new?template=feature_request.md)
 
-### Optional (Framework-Dependent)
+</div>
 
-- **ESX Legacy** - If using ESX framework mode
-- **QBCore** - If using QBCore framework mode
-- **Qbox** - If using Qbox framework mode
+---
 
-## Installation
+## ✨ Features
 
-### Step 1: Download and Extract
+### 📱 **Core System**
+- 🎨 Modern smartphone interface built with **Vue.js 3**
+- 📦 **23+ fully functional applications** ready to use
+- 🔄 **Framework-agnostic design** - Works with ESX, QBCore, Qbox, or Standalone
+- 🌍 **Multi-language support** - English, Japanese, Spanish, French, German, Portuguese + extensible
+- ⚡ Responsive UI with smooth animations and transitions
+- 🎯 Intuitive user experience with native mobile feel
 
-1. Download the latest release or clone the repository
-2. Extract to your FiveM server's `resources` folder
-3. Rename the folder to `fivem-smartphone-nui` (if needed)
+### 📞 **Communication**
+- 📞 **Voice calls** with seamless **pma-voice** integration
+- 💬 **Text messaging system** with offline message queuing
+- 👥 **Contact management** with search and organization
+- 🔔 **Real-time notifications** and alerts
+- 📱 Call history and voicemail support
 
-### Step 2: Install Dependencies
+### 💰 **Finance & Economy**
+- 🏦 **Advanced Banking System**
+  - Account balance management
+  - Player-to-player transfers by phone number
+  - Transaction history and receipts
+  - **Supports up to 999 trillion** ($999,000,000,000,000) per transaction
+- 💎 **Cryptocurrency Trading**
+  - Multiple cryptocurrencies (Bitcoin, Ethereum, Dogecoin)
+  - Dynamic pricing with real-time updates
+  - Portfolio management and tracking
+  - Buy/sell with instant transactions
+- 💵 **Smart Currency System**
+  - Handles amounts up to **999 trillion** with precision
+  - Automatic formatting with abbreviations (K, M, B, T)
+  - Multi-locale currency display (symbols, separators, formats)
+  - Configurable limits for server customization
 
-Ensure the following resources are installed and working:
+### 🎮 **Social Media & Entertainment**
+- 📸 **Shotz** - Instagram-like photo sharing platform
+- 🐦 **Chirper** - Twitter-like microblogging (280 characters)
+- 👗 **Modish** - Fashion and style showcase
+- 💕 **Flicker** - Dating and social connections
+- 👍 Like, comment, and share functionality
+- Real-time feed updates
+
+### 📷 **Media & Storage**
+- 📸 **Camera app** with photo capture
+- 🎥 **Video recording** with playback
+- 🎵 **Audio recorder** for voice memos
+- 🖼️ **Photo gallery** with albums and organization
+- ☁️ **Cloud storage integration** via Fivemanage CDN
+- 📤 Automatic media upload and backup
+- 🔒 Secure media URLs with CDN delivery
+
+### 🛠️ **Utilities**
+- 🗺️ **Maps** - GPS navigation and waypoints
+- 🌤️ **Weather** - Real-time weather information
+- 📝 **Notes** - Personal note-taking app
+- ⏰ **Clock** - Time, alarms, and timers
+- ⚙️ **Settings** - Customization and preferences
+- 🔍 Search functionality across apps
+
+### 🏠 **Property & Vehicles**
+- 🚗 **Vehicle garage management**
+- 🏡 **Home automation** controls
+- 🔑 Property access and security
+- 📊 Asset tracking and management
+
+### 🔧 **Technical Features**
+- 🗄️ **MySQL database persistence** via **oxmysql**
+- 🔌 **Extensible app module system** for custom development
+- 🚀 **Real-time data synchronization** across clients
+- 📡 **Comprehensive API** for third-party integrations
+- 🔒 **Security features** - Input validation, rate limiting, SQL injection protection
+- ⚡ **Performance optimized** - Caching, async operations, efficient queries
+- 🧩 **Modular architecture** - Easy to extend and customize
+
+## 📑 Table of Contents
+
+- [✨ Features](#-features)
+- [📋 Dependencies](#-dependencies)
+- [🚀 Installation](#-installation)
+- [⚙️ Configuration](#configuration)
+- [☁️ Fivemanage Integration](#fivemanage-integration)
+- [🗄️ Database Setup](#database-setup)
+- [🔧 Framework Integration](#framework-integration)
+- [📱 Usage](#usage)
+- [💻 Development](#development)
+- [🎨 Custom App Development](#custom-app-development)
+- [📡 API Documentation](#api-documentation)
+- [📚 Documentation](#-documentation)
+- [🐛 Troubleshooting](#troubleshooting)
+- [🤝 Support & Contributing](#-support--contributing)
+- [🙏 Credits & Acknowledgments](#-credits--acknowledgments)
+- [📄 License](#-license)
+
+## 📋 Dependencies
+
+### ✅ **Required Dependencies**
+
+| Resource | Version | Purpose | Link |
+|----------|---------|---------|------|
+| **oxmysql** | Latest | Database operations | [GitHub](https://github.com/overextended/oxmysql) |
+| **pma-voice** | Latest | Voice chat integration | [GitHub](https://github.com/AvarianKnight/pma-voice) |
+| **Node.js** | 16+ | NUI build process | [Download](https://nodejs.org/) |
+
+### 🔧 **Framework Support** (Choose One)
+
+| Framework | Status | Notes |
+|-----------|--------|-------|
+| **Standalone** | ✅ Full Support | No framework required |
+| **ESX Legacy** | ✅ Full Support | Auto-detection |
+| **QBCore** | ✅ Full Support | Auto-detection |
+| **Qbox** | ✅ Full Support | Auto-detection |
+
+### 📦 **Optional Services**
+
+| Service | Purpose | Link |
+|---------|---------|------|
+| **Fivemanage** | Cloud media storage (photos, videos, audio) | [fivemanage.com](https://fivemanage.com) |
+
+> **💡 Tip**: Fivemanage provides reliable cloud storage for media files. See [Fivemanage Integration](#fivemanage-integration) for setup instructions.
+
+---
+
+## 🚀 Installation
+
+> **⚠️ Important**: Follow these steps in order for proper installation. For detailed instructions, see the [Complete Installation Guide](INSTALL.md).
+
+### **Quick Start** ⚡
+
+Get up and running in 5 minutes:
 
 ```bash
-# In your server.cfg, ensure these are started BEFORE the phone resource
-ensure oxmysql
-ensure pma-voice
+# 1. Clone the repository to your resources folder
+cd resources
+git clone https://github.com/FosterG4/lb-gphone.git
+cd lb-gphone
+
+# 2. Build the NUI interface
+cd nui
+npm install
+npm run build
+cd ..
+
+# 3. Add to server.cfg (see configuration below)
+# 4. Start your server
 ```
 
-### Step 3: Build NUI Interface
+---
 
-The NUI interface must be built before first use:
+### **Step 1: Download & Extract** 📥
+
+Choose your preferred installation method:
+
+**Option A: Clone from GitHub (Recommended)**
+```bash
+# Navigate to your resources folder
+cd path/to/your/server/resources
+
+# Clone the repository
+git clone https://github.com/FosterG4/lb-gphone.git
+
+# Navigate into the resource
+cd lb-gphone
+```
+
+**Option B: Download Release**
+1. Visit [GitHub Releases](https://github.com/FosterG4/lb-gphone/releases)
+2. Download the latest release ZIP file
+3. Extract to your `resources` folder
+4. Rename folder to `lb-gphone` (if needed)
+
+**✅ Verification:**
+```bash
+# Verify folder structure
+ls -la
+# You should see: client/, server/, nui/, config.lua, fxmanifest.lua
+```
+
+---
+
+### **Step 2: Install Dependencies** 📦
+
+Add these to your `server.cfg` **before** the phone resource:
 
 ```bash
-# Navigate to the NUI directory
-cd resources/fivem-smartphone-nui/nui
+# ===================================
+# Required Dependencies (MUST START FIRST)
+# ===================================
+ensure oxmysql      # Database operations
+ensure pma-voice    # Voice call integration
 
-# Install Node.js dependencies
+# ===================================
+# Framework (Choose ONE or use standalone)
+# ===================================
+ensure es_extended  # For ESX Legacy
+# ensure qb-core    # For QBCore
+# ensure qbox       # For Qbox
+# (No framework needed for standalone mode)
+```
+
+**✅ Verification:**
+- Start your server and check console for dependency load messages
+- Ensure no errors appear for oxmysql or pma-voice
+- Confirm your framework (if using one) loads successfully
+
+---
+
+### **Step 3: Build NUI Interface** 🎨
+
+The NUI (user interface) must be built before first use:
+
+```bash
+# Navigate to NUI directory
+cd resources/lb-gphone/nui
+
+# Install Node.js dependencies (first time only)
 npm install
 
 # Build for production
 npm run build
 ```
 
-**Note:** Node.js v16 or higher is required for building the NUI.
+**Expected Output:**
+```
+✓ built in 15.2s
+✓ 125 modules transformed
+✓ dist/ folder created with index.html and assets/
+```
 
-### Step 4: Configure the Resource
+**✅ Verification:**
+```bash
+# Check that dist folder was created
+ls -la dist/
+# You should see: index.html, assets/ folder with JS and CSS files
+```
 
-1. Open `config.lua` in a text editor
-2. Set your framework type:
-   ```lua
-   Config.Framework = 'standalone' -- Options: 'standalone', 'esx', 'qbcore', 'qbox'
-   ```
-3. Customize other settings as needed (see [Configuration](#configuration) section)
+> **💡 Development Tip**: Use `npm run dev` for hot-reload during development
 
-### Step 5: Add to Server Config
+---
+
+### **Step 4: Configure Resource** ⚙️
+
+Edit `config.lua` to match your server setup:
+
+```lua
+-- ===================================
+-- Framework Configuration
+-- ===================================
+Config.Framework = 'standalone'  -- Options: 'standalone', 'esx', 'qbcore', 'qbox'
+
+-- ===================================
+-- Phone Settings
+-- ===================================
+Config.OpenKey = 'M'                    -- Key to open/close phone
+Config.PhoneNumberFormat = '###-####'   -- Phone number format (7 digits)
+Config.GenerateRandomNumbers = true     -- Random vs sequential numbers
+
+-- ===================================
+-- Wallet & Currency Settings
+-- ===================================
+Config.WalletApp = {
+    enabled = true,
+    maxTransferAmount = 999000000000000,  -- 999 trillion maximum
+    minTransferAmount = 1
+}
+```
+
+**✅ Verification:**
+- Save the file and check for syntax errors
+- Ensure `Config.Framework` matches your server setup
+- Verify `maxTransferAmount` is set to 999000000000000 for full currency support
+
+---
+
+### **Step 5: Add to Server Config** 📝
 
 Add the resource to your `server.cfg`:
 
 ```bash
-# Add after dependencies
-ensure fivem-smartphone-nui
+# ===================================
+# lb-gphone Smartphone System
+# ===================================
+ensure lb-gphone
 ```
 
-### Step 6: Start Server
+**Important:** Place this line **after** your dependencies and framework!
+
+**Complete Example:**
+```bash
+# Dependencies
+ensure oxmysql
+ensure pma-voice
+
+# Framework (if using)
+ensure es_extended
+
+# Phone Resource
+ensure lb-gphone
+```
+
+---
+
+### **Step 6: Start Server** 🚀
 
 Start or restart your FiveM server. The resource will automatically:
-- Create required database tables
-- Initialize the framework adapter
-- Assign phone numbers to players on first join
 
-## Configuration
+✅ Create required database tables  
+✅ Initialize the framework adapter  
+✅ Load all phone applications  
+✅ Assign phone numbers to players on first join  
 
-The `config.lua` file contains all customizable settings. Below is a detailed explanation of each section:
+**✅ Verification:**
 
-### Framework Settings
+Check your server console for these messages:
+```
+[lb-gphone] Resource started successfully
+[lb-gphone] Database tables initialized
+[lb-gphone] Framework adapter loaded: standalone
+[lb-gphone] 23 applications loaded
+[lb-gphone] Phone system ready
+```
+
+**In-Game Testing:**
+1. Join your server
+2. Press `M` (or your configured key) to open the phone
+3. You should see the phone interface with all apps
+4. Check that you have a phone number assigned (visible in Settings app)
+
+---
+
+### **🎉 Installation Complete!**
+
+Your phone system is now ready to use. For detailed configuration options, see the [Configuration](#configuration) section below.
+
+**Next Steps:**
+- 📖 Read the [User Manual](docs/USER_MANUAL.md) to learn all features
+- ⚙️ Customize settings in `config.lua` for your server
+- 🔧 Set up [Fivemanage Integration](#fivemanage-integration) for cloud media storage
+- 📱 Explore the [Custom App Development Guide](docs/CUSTOM_APP.md) to add your own apps
+
+**Need Help?** See [Troubleshooting](#troubleshooting) or [open an issue](https://github.com/FosterG4/lb-gphone/issues).
+
+## ⚙️ Configuration
+
+The `config.lua` file contains all customizable settings for the phone system. Here are the essential settings to get started:
+
+### Quick Configuration
 
 ```lua
 -- Framework type: 'standalone', 'esx', 'qbcore', 'qbox'
 Config.Framework = 'standalone'
-```
 
-- **standalone**: Uses FiveM license identifiers, no framework required
-- **esx**: Integrates with ESX Legacy framework
-- **qbcore**: Integrates with QBCore framework
-- **qbox**: Integrates with Qbox framework
-
-### Keybind Settings
-
-```lua
--- Key to open/close the phone (default: M)
+-- Key to open/close the phone
 Config.OpenKey = 'M'
-```
 
-Available key options: Any valid FiveM key mapping (e.g., 'M', 'F1', 'K', etc.)
-
-### Phone Number Settings
-
-```lua
 -- Phone number format (# represents a digit)
 Config.PhoneNumberFormat = '###-####'
 
--- Total digits in phone number
-Config.PhoneNumberLength = 7
-
--- Generate random numbers or use sequential
-Config.GenerateRandomNumbers = true
-```
-
-**Examples:**
-- `'###-####'` = 555-1234 (7 digits)
-- `'(###) ###-####'` = (555) 123-4567 (10 digits)
-- `'### ### ###'` = 555 123 456 (9 digits)
-
-### Feature Toggles
-
-```lua
--- Enable or disable specific apps
-Config.EnabledApps = {
-    contacts = true,
-    messages = true,
-    dialer = true,
-    bank = true,
-    twitter = true,
-    crypto = true
+-- Wallet & Currency Settings
+Config.WalletApp = {
+    enabled = true,
+    maxTransferAmount = 999000000000000,  -- 999 trillion maximum
+    minTransferAmount = 1
 }
+
+-- Media Storage (optional cloud storage)
+Config.MediaStorage = 'local'  -- Options: 'local', 'fivemanage'
 ```
 
-Set any app to `false` to disable it completely.
+> **📖 For complete configuration options**, including app settings, notifications, cryptocurrency, performance tuning, and more, see the [Configuration Reference in DOCUMENTATION.md](docs/DOCUMENTATION.md#configuration-reference)
 
-### Notification Settings
+## ☁️ Fivemanage Integration
 
-```lua
--- How long notifications stay on screen (milliseconds)
-Config.NotificationDuration = 5000
+Fivemanage is a CDN and media hosting service for FiveM servers that provides cloud storage for photos, videos, and audio files.
 
--- Position: 'top-right', 'top-left', 'bottom-right', 'bottom-left'
-Config.NotificationPosition = 'top-right'
-```
+### Quick Setup
 
-### Message Settings
+1. **Get API Key**: Visit [fivemanage.com](https://fivemanage.com) and create an account
+2. **Configure**: Add your API key to `config.lua`:
+   ```lua
+   Config.MediaStorage = 'fivemanage'
+   Config.FivemanageConfig = {
+       enabled = true,
+       apiKey = 'your_api_key_here',
+       fallbackToLocal = true
+   }
+   ```
+3. **Test**: Run `/phone:test-fivemanage` in-game to verify setup
 
-```lua
--- Maximum characters per message
-Config.MaxMessageLength = 500
+> **📖 For complete Fivemanage setup**, including migration tools, troubleshooting, admin commands, and best practices, see the [Fivemanage Integration Guide in DOCUMENTATION.md](docs/DOCUMENTATION.md#fivemanage-integration)
 
--- Cooldown between messages (milliseconds)
-Config.MessageCooldown = 1000
-```
+## 🗄️ Database Setup
 
-### Call Settings
+The resource automatically creates all required tables on first start. No manual setup needed.
 
-```lua
--- Time before unanswered call times out (milliseconds)
-Config.CallTimeout = 30000
+**Tables created automatically:**
+- `phone_players`, `phone_contacts`, `phone_messages`, `phone_call_history`, `phone_tweets`, `phone_crypto`
 
--- Maximum call duration (milliseconds)
-Config.MaxCallDuration = 3600000 -- 1 hour
-```
+> **📖 For manual database setup or schema details**, see the [Database Documentation in DOCUMENTATION.md](docs/DOCUMENTATION.md#database-setup)
 
-### Voice Settings
+## 🔧 Framework Integration
 
-```lua
--- pma-voice resource name (if different)
-Config.VoiceResource = 'pma-voice'
+The resource supports multiple frameworks with automatic detection:
 
--- Prefix for call voice channels
-Config.CallChannelPrefix = 'phone_call_'
-```
+| Framework | Setup |
+|-----------|-------|
+| **Standalone** | Set `Config.Framework = 'standalone'` (default) |
+| **ESX Legacy** | Set `Config.Framework = 'esx'` |
+| **QBCore** | Set `Config.Framework = 'qbcore'` |
+| **Qbox** | Set `Config.Framework = 'qbox'` |
 
-### Database Settings
+> **📖 For custom framework adapters**, see the [Framework Integration Guide in DOCUMENTATION.md](docs/DOCUMENTATION.md#framework-integration)
 
-```lua
--- oxmysql resource name (if different)
-Config.DatabaseResource = 'oxmysql'
-```
+## 📱 Usage
 
-### Cryptocurrency Settings
+### Basic Controls
 
-```lua
--- How often crypto prices update (milliseconds)
-Config.CryptoUpdateInterval = 60000 -- 1 minute
+- Press `M` (or your configured key) to open/close the phone
+- Navigate apps by tapping icons
+- Swipe or scroll through content
 
--- Available cryptocurrencies
-Config.AvailableCryptos = {
-    { name = 'Bitcoin', symbol = 'BTC', basePrice = 50000 },
-    { name = 'Ethereum', symbol = 'ETH', basePrice = 3000 },
-    { name = 'Dogecoin', symbol = 'DOGE', basePrice = 0.25 }
-}
-```
+### Key Features
 
-Add or remove cryptocurrencies as desired. Prices fluctuate randomly around the base price.
+- **Contacts**: Add, edit, and manage contacts with search functionality
+- **Messages**: Send text messages with offline queuing and notifications
+- **Calls**: Make voice calls using pma-voice integration
+- **Bank**: Transfer money, view balance and transaction history
+- **Social Media**: Post to Twitter-like feeds, share photos, connect with others
+- **Crypto**: Trade cryptocurrencies with real-time price updates
 
-### Twitter Settings
+> **📖 For complete user guides and app tutorials**, see the [User Manual in DOCUMENTATION.md](docs/DOCUMENTATION.md#user-manual)
 
-```lua
--- Maximum characters per tweet
-Config.MaxTweetLength = 280
-
--- Cooldown between tweets (milliseconds)
-Config.TweetCooldown = 5000
-
--- Maximum tweets to load in feed
-Config.MaxFeedItems = 50
-```
-
-### Performance Settings
-
-```lua
--- How long to cache database results (milliseconds)
-Config.DatabaseCacheTime = 300000 -- 5 minutes
-
--- Rate limit: max events per player per second
-Config.MaxEventsPerSecond = 10
-```
-
-## Database Setup
-
-The resource automatically creates all required tables on first start. No manual database setup is required.
-
-### Automatic Table Creation
-
-When the resource starts, it will create the following tables if they don't exist:
-
-- `phone_players` - Player phone numbers and identifiers
-- `phone_contacts` - Contact lists
-- `phone_messages` - Text messages
-- `phone_call_history` - Call logs
-- `phone_tweets` - Social media posts
-- `phone_crypto` - Cryptocurrency holdings
-
-### Manual Database Setup (Optional)
-
-If you prefer to create tables manually or need to reset the database, see the [SQL Schema Documentation](docs/DATABASE.md) for complete table definitions.
-
-## Framework Integration
-
-The resource uses an adapter pattern to support multiple frameworks. The appropriate adapter is automatically loaded based on your `Config.Framework` setting.
-
-### Standalone Mode
-
-No additional setup required. Uses FiveM license identifiers.
-
-### ESX Integration
-
-1. Set `Config.Framework = 'esx'`
-2. Ensure ESX is started before this resource
-3. The resource will automatically integrate with ESX player data and banking
-
-### QBCore Integration
-
-1. Set `Config.Framework = 'qbcore'`
-2. Ensure QBCore is started before this resource
-3. The resource will automatically integrate with QBCore player data and banking
-
-### Qbox Integration
-
-1. Set `Config.Framework = 'qbox'`
-2. Ensure Qbox is started before this resource
-3. The resource will automatically integrate with Qbox player data and banking
-
-For custom framework integration, see [Custom Framework Adapter Guide](docs/CUSTOM_FRAMEWORK.md).
-
-## Usage
-
-### Opening the Phone
-
-- Press the configured keybind (default: `M`) to open/close the phone
-- The phone cannot be opened while dead, handcuffed, or in a vehicle trunk
-
-### Managing Contacts
-
-1. Open the phone and tap the Contacts app
-2. Tap the "+" button to add a new contact
-3. Enter the contact name and phone number
-4. Use the search bar to find contacts quickly
-5. Tap a contact to view options (call, message, edit, delete)
-
-### Sending Messages
-
-1. Open the Messages app
-2. Tap "New Message" or select an existing conversation
-3. Type your message (max 500 characters)
-4. Press Send
-5. You'll receive notifications for new messages even when the phone is closed
-
-### Making Calls
-
-1. Open the Dialer app
-2. Enter the phone number using the number pad
-3. Tap the call button
-4. The recipient will receive a call notification
-5. Once answered, you can talk using pma-voice
-6. Tap "End Call" to hang up
-
-### Using Apps
-
-**Bank App:**
-- View your account balance
-- Transfer money to other players by phone number
-- View transaction history
-
-**Twitter App:**
-- View the public feed
-- Create posts (max 280 characters)
-- Like and reply to posts
-- View your own tweets
-
-**Crypto App:**
-- View available cryptocurrencies and current prices
-- Buy crypto with your bank balance
-- Sell crypto holdings
-- View your portfolio value
-
-## Development
+## 💻 Development
 
 ### Building NUI
 
-**Development mode with hot reload:**
 ```bash
 cd nui
-npm run dev
+npm install          # First time only
+npm run build        # Production build
+npm run dev          # Development with hot reload
 ```
 
-**Production build:**
-```bash
-cd nui
-npm run build
+> **📖 For custom app development and API documentation**, see:
+> - [Custom App Development Guide in DOCUMENTATION.md](docs/DOCUMENTATION.md#custom-app-development)
+> - [API Documentation in DOCUMENTATION.md](docs/DOCUMENTATION.md#api-documentation)
+
+## 🧪 Testing
+
+All test files are organized in the `tests/` directory for easy access and execution.
+
+### Test Structure
+
 ```
+tests/
+├── server/                      # Server-side tests
+│   ├── testing.lua             # Server functionality tests
+│   └── integration_tests.lua   # Integration tests
+├── nui/                        # NUI tests
+│   └── test-currency-formatting.html
+└── test_max_transfer.lua       # Max transfer amount tests
+```
+
+### Running Tests
+
+**Server Tests:**
+```bash
+# In-game console or server console
+/phone:run-tests              # Run all server tests
+/phone:test-integration       # Run integration tests only
+```
+
+**NUI Tests:**
+- Open `tests/nui/test-currency-formatting.html` in a browser
+- Check browser console for test results
+
+**Manual Testing:**
+```bash
+# Test specific features
+/phone:test-fivemanage        # Test Fivemanage integration
+/phone:test-currency          # Test currency formatting
+/phone:test-max-transfer      # Test max transfer limits
+```
+
+### Test Coverage
+
+The test suite covers:
+- ✅ Currency formatting and validation (up to 999 trillion)
+- ✅ Database operations and queries
+- ✅ Framework adapter integration
+- ✅ Phone number generation and validation
+- ✅ Media upload and storage
+- ✅ API endpoints and callbacks
+
+> **📖 For complete testing documentation**, including writing custom tests and CI/CD integration, see the [Testing Guide in DOCUMENTATION.md](docs/DOCUMENTATION.md#testing-guide)
 
 ### Project Structure
 
 ```
-fivem-smartphone-nui/
+lb-gphone/
 ├── client/              # Client-side Lua scripts
 │   ├── main.lua        # Phone open/close logic
 │   ├── nui.lua         # NUI callbacks
@@ -391,10 +546,11 @@ fivem-smartphone-nui/
 │   │   ├── qbcore.lua
 │   │   ├── qbox.lua
 │   │   └── standalone.lua
-│   └── apps/           # App modules
-│       ├── bank.lua
-│       ├── twitter.lua
-│       └── crypto.lua
+│   ├── apps/           # App modules
+│   │   ├── bank.lua
+│   │   ├── twitter.lua
+│   │   └── crypto.lua
+│   └── locales/        # Language files
 ├── nui/                # Vue.js NUI interface
 │   ├── src/
 │   │   ├── App.vue
@@ -407,28 +563,68 @@ fivem-smartphone-nui/
 │   ├── public/
 │   ├── dist/           # Built files
 │   └── package.json
-├── docs/               # Documentation
-│   ├── DATABASE.md     # Database schema
-│   ├── CUSTOM_FRAMEWORK.md # Framework adapter guide
-│   ├── CUSTOM_APP.md   # Custom app development
-│   └── API.md          # API documentation
+├── tests/              # Test files (organized by type)
+│   ├── server/         # Server-side tests
+│   │   ├── testing.lua
+│   │   └── integration_tests.lua
+│   ├── nui/            # NUI tests
+│   │   └── test-currency-formatting.html
+│   └── test_max_transfer.lua
+├── docs/               # Consolidated documentation
+│   └── DOCUMENTATION.md # Complete documentation (all guides, API, testing)
+├── .kiro/              # Kiro AI configuration
 ├── config.lua          # Configuration file
 ├── fxmanifest.lua      # Resource manifest
-└── README.md
+├── INSTALL.md          # Installation guide
+├── LICENSE.MD          # License information
+└── README.md           # This file
 ```
 
-## Custom App Development
+## 📚 Documentation
 
-Want to add your own app to the phone? See the [Custom App Development Guide](docs/CUSTOM_APP.md) for a complete tutorial with example code.
+> **📖 Complete documentation is now consolidated in [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md)**
 
-## API Documentation
+<div align="center">
 
-For developers integrating with or extending this resource, see the [API Documentation](docs/API.md) for:
-- NUI Callback API
-- Server Event API
-- Client Event API
-- Framework Adapter API
-- Export Functions
+### 🎯 **Quick Links**
+
+| Section | What You'll Find |
+|:--------|:-----------------|
+| [📖 **Complete Documentation**](docs/DOCUMENTATION.md) | **All-in-one guide** with setup, configuration, API, user manual, and more |
+| [⚡ **Quick Start**](#-installation) | Get up and running in 5 minutes |
+| [📋 **Installation Guide**](INSTALL.md) | Detailed step-by-step setup instructions |
+| [🐛 **Troubleshooting**](#troubleshooting) | Common issues and solutions |
+
+---
+
+### 📑 **What's in DOCUMENTATION.md**
+
+The consolidated documentation includes:
+
+- ✅ **Quick Start & Installation** - Get started quickly
+- ⚙️ **Configuration Reference** - All config options explained
+- 🗄️ **Database Setup** - Schema and manual setup
+- 🔧 **Framework Integration** - ESX, QBCore, Qbox, Standalone
+- 📱 **User Manual** - Complete guide to all 23+ apps
+- 🎨 **Custom App Development** - Build your own phone apps
+- 🔌 **API Documentation** - Events, callbacks, and exports
+- ☁️ **Fivemanage Integration** - Cloud media storage setup
+- 🧪 **Testing Guide** - How to run and write tests
+- 🐛 **Troubleshooting** - Solutions to common problems
+- 📝 **Changelog** - Version history and updates
+
+---
+
+### 🌐 **Community & Support**
+
+| Resource | Link |
+|:---------|:-----|
+| 🐛 **Bug Reports** | [Open Issue](https://github.com/FosterG4/lb-gphone/issues/new?template=bug_report.md) |
+| 💡 **Feature Requests** | [Request Feature](https://github.com/FosterG4/lb-gphone/issues/new?template=feature_request.md) |
+| 💬 **Discussions** | [GitHub Discussions](https://github.com/FosterG4/lb-gphone/discussions) |
+| 📦 **Releases** | [View Releases](https://github.com/FosterG4/lb-gphone/releases) |
+
+</div>
 
 ## Troubleshooting
 
@@ -473,19 +669,73 @@ For developers integrating with or extending this resource, see the [API Documen
 - Check that `Config.PhoneNumberLength` matches `Config.PhoneNumberFormat`
 - Try manually assigning a number via database
 
+### Media uploads failing
+
+- Check `Config.MediaStorage` setting ('local' or 'fivemanage')
+- If using Fivemanage, verify API key is correct
+- Test with `/phone:test-fivemanage` command
+- Check file size limits in config
+- Verify `Config.FivemanageConfig.fallbackToLocal = true` for automatic fallback
+- Check server console for specific error messages
+
+### Photos/videos not displaying
+
+- Verify media URLs in database are accessible
+- If using Fivemanage, check URLs open in browser
+- Clear FiveM cache and reconnect
+- Check browser console (F12) for loading errors
+- Verify NUI files are properly built
+
+---
+
+## 🤝 Support & Contributing
+
+<div align="center">
+
+### 💬 **Need Help?**
+
+| 🐛 **Found a Bug?** | 💡 **Have an Idea?** | 📖 **Need Documentation?** |
+|---------------------|----------------------|----------------------------|
+| [Report Issue](https://github.com/FosterG4/lb-gphone/issues/new?template=bug_report.md) | [Feature Request](https://github.com/FosterG4/lb-gphone/issues/new?template=feature_request.md) | [View Docs](docs/) |
+
+### 🛠️ **Contributing**
+
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting PRs.
+
+</div>
+
+---
+
+## 🙏 Credits & Acknowledgments
+
+<div align="center">
+
+**Built with amazing open-source technologies:**
+
+[![Vue.js](https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com/)
+
+**Special thanks to:**
+- [pma-voice](https://github.com/AvarianKnight/pma-voice) for voice integration
+- [oxmysql](https://github.com/overextended/oxmysql) for database operations
+- The FiveM community for continuous support and feedback
+
+</div>
+
+---
+
 ## Support
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/U7U71NMCFN)
 
-For issues, questions, or contributions:
-- Open an issue on GitHub
-- Check existing issues for solutions
-- Review the documentation in the `docs/` folder
+## 📄 License
 
-## Credits
+<div align="center">
 
-- Built with [Vue.js](https://vuejs.org/)
-- Voice integration via [pma-voice](https://github.com/AvarianKnight/pma-voice)
-- Database operations via [oxmysql](https://github.com/overextended/oxmysql)
+**MIT License** - see [LICENSE](LICENSE) file for details
 
-## License
+*This project is open source and available under the MIT License.*
 
-This project is open source and available under the MIT License.
+**Made with ❤️ for the FiveM community**
+
+</div>

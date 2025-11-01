@@ -6,7 +6,8 @@ export default {
   
   state: {
     list: [],
-    searchQuery: ''
+    searchQuery: '',
+    selectedContact: null
   },
   
   getters: {
@@ -57,6 +58,10 @@ export default {
       if (index !== -1) {
         state.list.splice(index, 1)
       }
+    },
+    
+    setSelectedContact(state, contact) {
+      state.selectedContact = contact
     }
   },
   

@@ -484,6 +484,591 @@ RegisterNetEvent('phone:client:receiveMoneyNotification', function(data)
     )
 end)
 
+-- ============================================================================
+-- Wallet App Callbacks (Unified Banking Solution)
+-- ============================================================================
+
+-- Get wallet accounts
+RegisterNUICallback('getWalletAccounts', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletAccounts')
+    
+    local timeout = 0
+    local responseReceived = false
+    local accountsData = {}
+    
+    local function onReceiveAccounts(result)
+        accountsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletAccounts', onReceiveAccounts)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(accountsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet transactions
+RegisterNUICallback('getWalletTransactions', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletTransactions', data or {})
+    
+    local timeout = 0
+    local responseReceived = false
+    local transactionsData = {}
+    
+    local function onReceiveTransactions(result)
+        transactionsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletTransactions', onReceiveTransactions)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(transactionsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create wallet transfer
+RegisterNUICallback('createWalletTransfer', function(data, cb)
+    if not data.toNumber or not data.amount then
+        cb({ success = false, message = 'Recipient and amount are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createWalletTransfer', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onTransferResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletTransferResult', onTransferResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet analytics
+RegisterNUICallback('getWalletAnalytics', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletAnalytics')
+    
+    local timeout = 0
+    local responseReceived = false
+    local analyticsData = {}
+    
+    local function onReceiveAnalytics(result)
+        analyticsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletAnalytics', onReceiveAnalytics)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(analyticsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet budgets
+RegisterNUICallback('getWalletBudgets', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletBudgets')
+    
+    local timeout = 0
+    local responseReceived = false
+    local budgetsData = {}
+    
+    local function onReceiveBudgets(result)
+        budgetsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletBudgets', onReceiveBudgets)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(budgetsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create wallet budget
+RegisterNUICallback('createWalletBudget', function(data, cb)
+    if not data.category or not data.limitAmount then
+        cb({ success = false, message = 'Category and limit amount are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createWalletBudget', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onBudgetResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletBudgetResult', onBudgetResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update wallet budget
+RegisterNUICallback('updateWalletBudget', function(data, cb)
+    if not data.budgetId then
+        cb({ success = false, message = 'Budget ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:updateWalletBudget', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUpdateResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletBudgetUpdateResult', onUpdateResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Delete wallet budget
+RegisterNUICallback('deleteWalletBudget', function(data, cb)
+    if not data.budgetId then
+        cb({ success = false, message = 'Budget ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:deleteWalletBudget', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onDeleteResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletBudgetDeleteResult', onDeleteResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet recurring payments
+RegisterNUICallback('getWalletRecurringPayments', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletRecurringPayments')
+    
+    local timeout = 0
+    local responseReceived = false
+    local paymentsData = {}
+    
+    local function onReceivePayments(result)
+        paymentsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletRecurringPayments', onReceivePayments)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(paymentsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create wallet recurring payment
+RegisterNUICallback('createWalletRecurringPayment', function(data, cb)
+    if not data.name or not data.amount or not data.frequency or not data.recipientNumber then
+        cb({ success = false, message = 'All fields are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createWalletRecurringPayment', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onRecurringResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletRecurringResult', onRecurringResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Delete wallet recurring payment
+RegisterNUICallback('deleteWalletRecurringPayment', function(data, cb)
+    if not data.paymentId then
+        cb({ success = false, message = 'Payment ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:deleteWalletRecurringPayment', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onDeleteResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletRecurringDeleteResult', onDeleteResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet user settings
+RegisterNUICallback('getWalletUserSettings', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletUserSettings')
+    
+    local timeout = 0
+    local responseReceived = false
+    local settingsData = {}
+    
+    local function onReceiveSettings(result)
+        settingsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletUserSettings', onReceiveSettings)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(settingsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update wallet user settings
+RegisterNUICallback('updateWalletUserSettings', function(data, cb)
+    TriggerServerEvent('phone:server:updateWalletUserSettings', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUpdateResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletSettingsUpdateResult', onUpdateResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update wallet theme
+RegisterNUICallback('updateWalletTheme', function(data, cb)
+    TriggerServerEvent('phone:server:updateWalletTheme', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUpdateResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletThemeUpdateResult', onUpdateResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update wallet customization
+RegisterNUICallback('updateWalletCustomization', function(data, cb)
+    TriggerServerEvent('phone:server:updateWalletCustomization', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUpdateResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletCustomizationUpdateResult', onUpdateResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get wallet cards
+RegisterNUICallback('getWalletCards', function(data, cb)
+    TriggerServerEvent('phone:server:getWalletCards')
+    
+    local timeout = 0
+    local responseReceived = false
+    local cardsData = {}
+    
+    local function onReceiveCards(result)
+        cardsData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveWalletCards', onReceiveCards)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(cardsData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Add wallet card
+RegisterNUICallback('addWalletCard', function(data, cb)
+    TriggerServerEvent('phone:server:addWalletCard', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onAddResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletCardAddResult', onAddResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update wallet card
+RegisterNUICallback('updateWalletCard', function(data, cb)
+    TriggerServerEvent('phone:server:updateWalletCard', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onUpdateResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletCardUpdateResult', onUpdateResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Remove wallet card
+RegisterNUICallback('removeWalletCard', function(data, cb)
+    TriggerServerEvent('phone:server:removeWalletCard', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onRemoveResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:walletCardRemoveResult', onRemoveResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
 -- Twitter App Callbacks
 
 -- Get chirper feed
@@ -2537,4 +3122,872 @@ RegisterNetEvent('phone:client:flickerUnmatched', function(data)
         action = 'flickerUnmatched',
         data = data
     })
+end)
+
+-- Pages App Callbacks
+
+-- Send page announcement
+RegisterNUICallback('phone:server:sendPageAnnouncement', function(data, cb)
+    if not data.pageId or not data.message then
+        cb({ success = false, message = 'Page ID and message are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:sendPageAnnouncement', data)
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onAnnouncementSent(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:pageAnnouncementSent', onAnnouncementSent)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Fetch business pages
+RegisterNUICallback('getBusinessPages', function(data, cb)
+    TriggerServerEvent('phone:server:getBusinessPages', data or {})
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onReceive(pagesData)
+        resultData = pagesData
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:receiveBusinessPages', onReceive)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Fetch my business pages
+RegisterNUICallback('getMyBusinessPages', function(data, cb)
+    TriggerServerEvent('phone:server:getMyBusinessPages')
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onReceive(pagesData)
+        resultData = pagesData
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:receiveMyBusinessPages', onReceive)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Fetch following pages
+RegisterNUICallback('getFollowingPages', function(data, cb)
+    TriggerServerEvent('phone:server:getFollowingPages')
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onReceive(pagesData)
+        resultData = pagesData
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:receiveFollowingPages', onReceive)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create business page
+RegisterNUICallback('createBusinessPage', function(data, cb)
+    TriggerServerEvent('phone:server:createBusinessPage', data)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onCreated(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:businessPageCreated', onCreated)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update business page
+RegisterNUICallback('updateBusinessPage', function(data, cb)
+    TriggerServerEvent('phone:server:updateBusinessPage', data)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onUpdated(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:businessPageUpdated', onUpdated)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Delete business page
+RegisterNUICallback('deleteBusinessPage', function(pageId, cb)
+    TriggerServerEvent('phone:server:deleteBusinessPage', pageId)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onDeleted(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:businessPageDeleted', onDeleted)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Follow business page
+RegisterNUICallback('followBusinessPage', function(pageId, cb)
+    TriggerServerEvent('phone:server:followBusinessPage', pageId)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onFollowed(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:businessPageFollowed', onFollowed)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Unfollow business page
+RegisterNUICallback('unfollowBusinessPage', function(pageId, cb)
+    TriggerServerEvent('phone:server:unfollowBusinessPage', pageId)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onUnfollowed(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:businessPageUnfollowed', onUnfollowed)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Track page view (fire-and-forget)
+RegisterNUICallback('trackPageView', function(pageId, cb)
+    TriggerServerEvent('phone:server:trackPageView', pageId)
+    cb({ success = true })
+end)
+
+-- Get page statistics
+RegisterNUICallback('getPageStatistics', function(pageId, cb)
+    TriggerServerEvent('phone:server:getPageStatistics', pageId)
+
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+
+    local function onStats(result)
+        resultData = result
+        responseReceived = true
+    end
+
+    local handler = AddEventHandler('phone:client:receivePageStatistics', onStats)
+
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+
+    RemoveEventHandler(handler)
+
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Settings App Callbacks
+
+-- Set player locale (language preference)
+RegisterNUICallback('setPlayerLocale', function(data, cb)
+    if not data.locale then
+        cb({ success = false, message = 'Locale is required' })
+        return
+    end
+    
+    -- Validate locale format (2-letter code)
+    if type(data.locale) ~= 'string' or #data.locale ~= 2 then
+        cb({ success = false, message = 'Invalid locale format' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:setPlayerLocale', {
+        locale = data.locale
+    })
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:localeUpdateResult', onResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get player settings (including locale)
+RegisterNUICallback('getPlayerSettings', function(data, cb)
+    TriggerServerEvent('phone:server:getSettings')
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local settingsData = {}
+    
+    local function onReceiveSettings(settings)
+        settingsData = settings
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:receiveSettings', onReceiveSettings)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb({ success = true, settings = settingsData })
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Update player settings
+RegisterNUICallback('updatePlayerSettings', function(data, cb)
+    if not data.updates or type(data.updates) ~= 'table' then
+        cb({ success = false, message = 'Settings updates are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:updateSettings', data.updates)
+    
+    -- Wait for server response
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:settingsUpdated', onResult)
+    
+    -- Wait for response with timeout
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb({ success = true, settings = resultData })
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+
+-- ============================================================================
+-- Musicly App Callbacks (Music Streaming)
+-- ============================================================================
+
+-- Initialize Musicly
+RegisterNUICallback('initializeMusicly', function(data, cb)
+    TriggerServerEvent('phone:server:initializeMusicly')
+    
+    local timeout = 0
+    local responseReceived = false
+    local musiclyData = {}
+    
+    local function onMusiclyInitialized(result)
+        musiclyData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:musiclyInitialized', onMusiclyInitialized)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(musiclyData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Search music
+RegisterNUICallback('searchMusic', function(data, cb)
+    if not data.query then
+        cb({ success = false, message = 'Search query is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:searchMusic', data.query)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultsData = {}
+    
+    local function onSearchResults(results)
+        resultsData = results
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:musicSearchResults', onSearchResults)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb({ success = true, results = resultsData })
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Browse music category
+RegisterNUICallback('browseMusicCategory', function(data, cb)
+    if not data.categoryId then
+        cb({ success = false, message = 'Category ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:browseMusicCategory', data.categoryId)
+    
+    local timeout = 0
+    local responseReceived = false
+    local tracksData = {}
+    
+    local function onCategoryResults(tracks)
+        tracksData = tracks
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:musicCategoryResults', onCategoryResults)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb({ success = true, tracks = tracksData })
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Create playlist
+RegisterNUICallback('createPlaylist', function(data, cb)
+    if not data.name then
+        cb({ success = false, message = 'Playlist name is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:createPlaylist', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onPlaylistCreated(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:playlistCreated', onPlaylistCreated)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Delete playlist
+RegisterNUICallback('deletePlaylist', function(data, cb)
+    if not data.playlistId then
+        cb({ success = false, message = 'Playlist ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:deletePlaylist', data.playlistId)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onPlaylistDeleted(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:playlistDeleted', onPlaylistDeleted)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Get playlist tracks
+RegisterNUICallback('getPlaylistTracks', function(data, cb)
+    if not data.playlistId then
+        cb({ success = false, message = 'Playlist ID is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:getPlaylistTracks', data.playlistId)
+    
+    local timeout = 0
+    local responseReceived = false
+    local playlistData = {}
+    
+    local function onPlaylistTracks(result)
+        playlistData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:playlistTracks', onPlaylistTracks)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(playlistData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- Add track to playlist
+RegisterNUICallback('addTrackToPlaylist', function(data, cb)
+    if not data.playlistId or not data.track then
+        cb({ success = false, message = 'Playlist ID and track are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:addTrackToPlaylist', data)
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onTrackAdded(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:trackAddedToPlaylist', onTrackAdded)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, message = 'Request timeout' })
+    end
+end)
+
+-- ============================================================================
+-- Contact Sharing Callbacks
+-- ============================================================================
+
+-- Share contact with nearby player
+RegisterNUICallback('shareContact', function(data, cb)
+    if not data.targetSource then
+        cb({ success = false, error = 'TARGET_REQUIRED', message = 'Target player is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:sendShareRequest', {
+        targetSource = data.targetSource,
+        targetName = data.targetName,
+        targetNumber = data.targetNumber
+    })
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onShareResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:shareRequestResult', onShareResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
+end)
+
+-- Add contact from broadcast
+RegisterNUICallback('addFromBroadcast', function(data, cb)
+    if not data.broadcasterNumber then
+        cb({ success = false, error = 'BROADCASTER_REQUIRED', message = 'Broadcaster number is required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:addFromBroadcast', {
+        broadcasterNumber = data.broadcasterNumber,
+        broadcasterName = data.broadcasterName,
+        broadcasterSource = data.broadcasterSource
+    })
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onAddResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:addFromBroadcastResult', onAddResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
+end)
+
+-- Respond to share request (accept/decline)
+RegisterNUICallback('respondToShareRequest', function(data, cb)
+    if not data.requestId or data.accepted == nil then
+        cb({ success = false, error = 'INVALID_REQUEST', message = 'Request ID and accepted status are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:respondToShareRequest', {
+        requestId = data.requestId,
+        accepted = data.accepted
+    })
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onResponseResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:shareResponseResult', onResponseResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
+end)
+
+-- Start broadcast share
+RegisterNUICallback('startBroadcastShare', function(data, cb)
+    TriggerServerEvent('phone:server:startBroadcastShare')
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onBroadcastResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:broadcastShareResult', onBroadcastResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
+end)
+
+-- Stop broadcast share
+RegisterNUICallback('stopBroadcastShare', function(data, cb)
+    TriggerServerEvent('phone:server:stopBroadcastShare')
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onStopResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:broadcastStopResult', onStopResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
+end)
+
+-- Respond to share request (accept or decline)
+RegisterNUICallback('respondToShareRequest', function(data, cb)
+    if not data.requestId or data.accepted == nil then
+        cb({ success = false, error = 'INVALID_REQUEST', message = 'Request ID and accepted status are required' })
+        return
+    end
+    
+    TriggerServerEvent('phone:server:respondToShareRequest', {
+        requestId = data.requestId,
+        accepted = data.accepted
+    })
+    
+    local timeout = 0
+    local responseReceived = false
+    local resultData = {}
+    
+    local function onResponseResult(result)
+        resultData = result
+        responseReceived = true
+    end
+    
+    local eventHandler = AddEventHandler('phone:client:shareRequestResponseResult', onResponseResult)
+    
+    while not responseReceived and timeout < 50 do
+        Wait(100)
+        timeout = timeout + 1
+    end
+    
+    RemoveEventHandler(eventHandler)
+    
+    if responseReceived then
+        cb(resultData)
+    else
+        cb({ success = false, error = 'CALLBACK_FAILED', message = 'Request timeout' })
+    end
 end)

@@ -5,6 +5,7 @@ import contacts from './modules/contacts'
 import messages from './modules/messages'
 import calls from './modules/calls'
 import apps from './modules/apps'
+import wallet from './modules/wallet'
 import settings from './modules/settings'
 import media from './modules/media'
 import garage from './modules/garage'
@@ -13,6 +14,10 @@ import shotz from './modules/shotz'
 import chirper from './modules/chirper'
 import modish from './modules/modish'
 import flicker from './modules/flicker'
+import marketplace from './modules/marketplace'
+import pages from './modules/pages'
+import musicly from './modules/musicly'
+import nearbyPlayers from './modules/nearbyPlayers'
 
 export default createStore({
   modules: {
@@ -21,6 +26,7 @@ export default createStore({
     messages,
     calls,
     apps,
+    wallet,
     settings,
     media,
     garage,
@@ -28,6 +34,10 @@ export default createStore({
     shotz,
     chirper,
     modish,
-    flicker
+    flicker,
+    marketplace,
+    pages,
+    musicly,
+    nearbyPlayers
   }
 })

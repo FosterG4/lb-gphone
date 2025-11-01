@@ -63,6 +63,11 @@ function OpenPhone()
     -- Request phone data from server
     TriggerServerEvent('phone:server:requestPhoneData')
     
+    -- Notify contact sharing module
+    if playerData.phoneNumber then
+        exports['phone-system']:NotifyPhoneOpened(playerData.phoneNumber)
+    end
+    
     if Config.DebugMode then
         print('[Phone] Phone opened')
     end
@@ -76,6 +81,9 @@ function ClosePhone()
         action = 'setVisible',
         data = { visible = false }
     })
+    
+    -- Notify contact sharing module
+    exports['phone-system']:NotifyPhoneClosed()
     
     if Config.DebugMode then
         print('[Phone] Phone closed')
@@ -133,6 +141,11 @@ RegisterNetEvent('phone:client:setPhoneNumber', function(phoneNumber)
         action = 'setPhoneNumber',
         data = { phoneNumber = phoneNumber }
     })
+    
+    -- If phone is already open, notify contact sharing
+    if isPhoneOpen then
+        exports['phone-system']:NotifyPhoneOpened(phoneNumber)
+    end
     
     if Config.DebugMode then
         print('[Phone] Phone number set: ' .. phoneNumber)

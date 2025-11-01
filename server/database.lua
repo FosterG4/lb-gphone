@@ -1,5 +1,41 @@
+-- ============================================================================
 -- Database Module for FiveM Smartphone System
+-- ============================================================================
 -- Handles database initialization, table creation, and CRUD operations
+--
+-- SQL FILE ORGANIZATION:
+-- All database table schemas are also available as organized SQL files in
+-- the server/sql/ directory for manual installation and reference.
+--
+-- SQL Files Available:
+--   - server/sql/install_all_tables.sql       (Master installation script)
+--   - server/sql/phone_core_tables.sql        (Core system tables)
+--   - server/sql/phone_media_tables.sql       (Media storage tables)
+--   - server/sql/phone_wallet_tables.sql      (Wallet/banking tables)
+--   - server/sql/phone_cryptox_tables.sql     (Crypto trading tables)
+--   - server/sql/phone_musicly_tables.sql     (Music app tables)
+--   - server/sql/phone_finder_tables.sql      (Finder/GPS tables)
+--   - server/sql/phone_safezone_tables.sql    (Emergency/safety tables)
+--   - server/sql/phone_marketplace_tables.sql (Marketplace tables)
+--   - server/sql/phone_business_tables.sql    (Business pages tables)
+--   - server/sql/phone_utilities_tables.sql   (Notes, alarms, voice recorder)
+--   - server/sql/phone_assets_tables.sql      (Vehicles and properties)
+--   - And more... (see server/sql/ directory)
+--
+-- MANUAL SQL INSTALLATION:
+-- If automatic table creation fails or you prefer manual installation:
+--   1. Connect to MySQL: mysql -u username -p database_name
+--   2. Execute master script: SOURCE server/sql/install_all_tables.sql;
+--   OR execute individual files as needed
+--
+-- BACKWARD COMPATIBILITY:
+-- This Lua-based table creation is maintained for backward compatibility
+-- and automatic setup. The SQL files contain the same table definitions
+-- with additional documentation and comments.
+--
+-- For detailed SQL documentation, see: server/sql/ directory
+-- For installation guide, see: INSTALL.md (SQL File Organization section)
+-- ============================================================================
 
 local Database = {}
 local MySQL = nil
@@ -56,11 +92,44 @@ function Database.HealthCheck()
     return success
 end
 
+-- ============================================================================
 -- Create all required database tables
+-- ============================================================================
+-- This function creates all phone system tables programmatically.
+--
+-- ALTERNATIVE: SQL Files
+-- All these table definitions are also available as organized SQL files
+-- in the server/sql/ directory. You can use those files for:
+--   - Manual database setup
+--   - Database documentation and reference
+--   - Version control and schema management
+--   - Easier review and maintenance
+--
+-- To use SQL files instead:
+--   1. Set Config.CreateTablesOnStart = false (to skip automatic creation)
+--   2. Execute: mysql -u user -p database < server/sql/install_all_tables.sql
+--
+-- SQL File Reference:
+--   - phone_core_tables.sql: Contains phone_players, phone_contacts, 
+--     phone_messages, phone_call_history, phone_settings
+--   - phone_media_tables.sql: Contains phone_media, phone_albums, 
+--     phone_album_media
+--   - phone_wallet_tables.sql: Contains phone_bankr_* and phone_bank_* tables
+--   - phone_cryptox_tables.sql: Contains phone_cryptox_* and phone_crypto tables
+--   - phone_utilities_tables.sql: Contains phone_notes, phone_alarms, 
+--     phone_voice_* tables
+--   - phone_assets_tables.sql: Contains phone_vehicles, phone_properties, 
+--     phone_property_keys, phone_access_logs
+--   - And more... (see server/sql/ directory for complete list)
+--
+-- For detailed documentation on each table, see the corresponding SQL file.
+-- ============================================================================
 function Database.CreateTables()
     print('^3[PHONE] Creating database tables...^0')
+    print('^3[PHONE] Note: SQL files are available in server/sql/ for manual installation^0')
     
     -- Table 1: phone_players
+    -- SQL File: server/sql/phone_core_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_players (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,6 +143,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 2: phone_contacts
+    -- SQL File: server/sql/phone_core_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_contacts (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,6 +157,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 3: phone_messages
+    -- SQL File: server/sql/phone_core_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,6 +172,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 4: phone_call_history
+    -- SQL File: server/sql/phone_core_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_call_history (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -115,6 +187,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 5: phone_chirps
+    -- SQL File: server/sql/phone_chirper_tables.sql (legacy table)
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_chirps (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -128,6 +201,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 5b: phone_chirp_likes (for tracking who liked which chirps)
+    -- SQL File: server/sql/phone_chirper_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_chirp_likes (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -142,6 +216,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 6: phone_crypto
+    -- SQL File: server/sql/phone_cryptox_tables.sql (legacy table)
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_crypto (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -154,6 +229,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 7: phone_bank_transactions
+    -- SQL File: server/sql/phone_wallet_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_bank_transactions (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -168,6 +244,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 8: phone_settings
+    -- SQL File: server/sql/phone_core_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_settings (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,12 +253,14 @@ function Database.CreateTables()
             notification_enabled BOOLEAN DEFAULT TRUE,
             sound_enabled BOOLEAN DEFAULT TRUE,
             volume INT DEFAULT 50,
+            locale VARCHAR(10) DEFAULT 'en',
             settings_json TEXT,
             FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]], {})
     
     -- Table 9: phone_media
+    -- SQL File: server/sql/phone_media_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_media (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -202,6 +281,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 10: phone_albums
+    -- SQL File: server/sql/phone_media_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_albums (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -216,6 +296,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 11: phone_album_media
+    -- SQL File: server/sql/phone_media_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_album_media (
             album_id INT NOT NULL,
@@ -228,6 +309,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 12: phone_notes
+    -- SQL File: server/sql/phone_utilities_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_notes (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -242,6 +324,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 13: phone_alarms
+    -- SQL File: server/sql/phone_utilities_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_alarms (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -257,6 +340,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 14: phone_vehicles
+    -- SQL File: server/sql/phone_assets_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_vehicles (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -275,6 +359,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 15: phone_properties
+    -- SQL File: server/sql/phone_assets_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_properties (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -290,6 +375,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 16: phone_property_keys
+    -- SQL File: server/sql/phone_assets_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_property_keys (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -305,6 +391,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 16a: phone_access_logs
+    -- SQL File: server/sql/phone_assets_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_access_logs (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -320,6 +407,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 17: phone_shotz_posts
+    -- SQL File: server/sql/phone_shotz_additional_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_shotz_posts (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -340,6 +428,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 18: phone_shotz_followers
+    -- SQL File: server/sql/phone_shotz_additional_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_shotz_followers (
             follower_number VARCHAR(20) NOT NULL,
@@ -352,6 +441,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 19: phone_chirper_posts
+    -- SQL File: server/sql/phone_chirper_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_chirper_posts (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -372,6 +462,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 20: phone_modish_videos
+    -- SQL File: server/sql/phone_modish_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_modish_videos (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -392,6 +483,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 21: phone_flicker_profiles
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_profiles (
             phone_number VARCHAR(20) PRIMARY KEY,
@@ -406,6 +498,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 22: phone_flicker_swipes
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_swipes (
             swiper_number VARCHAR(20) NOT NULL,
@@ -419,6 +512,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 23: phone_flicker_matches
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_matches (
             player1_number VARCHAR(20) NOT NULL,
@@ -439,6 +533,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 23a: phone_flicker_messages
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -458,6 +553,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 23b: phone_flicker_blocks
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_blocks (
             blocker_number VARCHAR(20) NOT NULL,
@@ -472,6 +568,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 23c: phone_flicker_reports
+    -- SQL File: server/sql/phone_flicker_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_flicker_reports (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -489,6 +586,7 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 24: phone_marketplace_listings
+    -- SQL File: server/sql/phone_marketplace_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_marketplace_listings (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -508,27 +606,155 @@ function Database.CreateTables()
     ]], {})
     
     -- Table 25: phone_business_pages
+    -- SQL File: server/sql/phone_business_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_business_pages (
             id INT AUTO_INCREMENT PRIMARY KEY,
             owner_number VARCHAR(20) NOT NULL,
-            business_name VARCHAR(200) NOT NULL,
+            name VARCHAR(200) NOT NULL,
             description TEXT,
             category VARCHAR(50),
             contact_number VARCHAR(20),
             location_x FLOAT,
             location_y FLOAT,
-            photos_json TEXT,
-            services_json TEXT,
-            followers INT DEFAULT 0,
+            photos TEXT,
+            services TEXT,
+            followers_count INT DEFAULT 0,
+            rating DECIMAL(3,2) DEFAULT 0.00,
+            reviews_count INT DEFAULT 0,
+            status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_owner (owner_number),
             INDEX idx_category (category),
+            INDEX idx_status (status),
+            INDEX idx_rating (rating),
             FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]], {})
     
+    -- Table 25a: phone_page_followers (Business page followers)
+    -- SQL File: server/sql/phone_business_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_page_followers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            page_id INT NOT NULL,
+            follower_number VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_page (page_id),
+            INDEX idx_follower (follower_number),
+            UNIQUE KEY unique_follow (page_id, follower_number),
+            FOREIGN KEY (page_id) REFERENCES phone_business_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (follower_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 25b: phone_page_reviews (Business page reviews)
+    -- SQL File: server/sql/phone_business_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_page_reviews (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            page_id INT NOT NULL,
+            reviewer_number VARCHAR(20) NOT NULL,
+            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            review_text TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_page (page_id),
+            INDEX idx_reviewer (reviewer_number),
+            INDEX idx_rating (rating),
+            INDEX idx_created (created_at DESC),
+            UNIQUE KEY unique_review (page_id, reviewer_number),
+            FOREIGN KEY (page_id) REFERENCES phone_business_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (reviewer_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 25c: phone_page_views (Business page view tracking)
+    -- SQL File: server/sql/phone_business_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_page_views (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            page_id INT NOT NULL,
+            viewer_number VARCHAR(20) NOT NULL,
+            viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_page (page_id),
+            INDEX idx_viewer (viewer_number),
+            INDEX idx_viewed (viewed_at DESC),
+            FOREIGN KEY (page_id) REFERENCES phone_business_pages(id) ON DELETE CASCADE,
+            FOREIGN KEY (viewer_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 24a: phone_marketplace_transactions (Marketplace transactions)
+    -- SQL File: server/sql/phone_marketplace_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_marketplace_transactions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            listing_id INT NOT NULL,
+            buyer_number VARCHAR(20) NOT NULL,
+            seller_number VARCHAR(20) NOT NULL,
+            amount DECIMAL(15, 2) NOT NULL,
+            status ENUM('pending', 'completed', 'cancelled', 'disputed') DEFAULT 'pending',
+            payment_method VARCHAR(50) DEFAULT 'cash',
+            transaction_fee DECIMAL(15, 2) DEFAULT 0,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP NULL,
+            INDEX idx_listing (listing_id),
+            INDEX idx_buyer (buyer_number),
+            INDEX idx_seller (seller_number),
+            INDEX idx_status (status),
+            INDEX idx_created (created_at DESC),
+            FOREIGN KEY (listing_id) REFERENCES phone_marketplace_listings(id) ON DELETE CASCADE,
+            FOREIGN KEY (buyer_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
+            FOREIGN KEY (seller_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 24b: phone_marketplace_reviews (Marketplace reviews)
+    -- SQL File: server/sql/phone_marketplace_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_marketplace_reviews (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            transaction_id INT NOT NULL,
+            reviewer_number VARCHAR(20) NOT NULL,
+            reviewed_number VARCHAR(20) NOT NULL,
+            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            review_text TEXT,
+            review_type ENUM('buyer', 'seller') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_transaction (transaction_id),
+            INDEX idx_reviewer (reviewer_number),
+            INDEX idx_reviewed (reviewed_number),
+            INDEX idx_rating (rating),
+            INDEX idx_type (review_type),
+            INDEX idx_created (created_at DESC),
+            UNIQUE KEY unique_review (transaction_id, reviewer_number),
+            FOREIGN KEY (transaction_id) REFERENCES phone_marketplace_transactions(id) ON DELETE CASCADE,
+            FOREIGN KEY (reviewer_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
+            FOREIGN KEY (reviewed_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 24c: phone_marketplace_favorites (Marketplace favorites)
+    -- SQL File: server/sql/phone_marketplace_tables.sql
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_marketplace_favorites (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            listing_id INT NOT NULL,
+            user_number VARCHAR(20) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_listing (listing_id),
+            INDEX idx_user (user_number),
+            INDEX idx_created (created_at DESC),
+            UNIQUE KEY unique_favorite (listing_id, user_number),
+            FOREIGN KEY (listing_id) REFERENCES phone_marketplace_listings(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
     -- Table 26: phone_cryptox_holdings
+    -- SQL File: server/sql/phone_cryptox_tables.sql
     MySQL:execute([[
         CREATE TABLE IF NOT EXISTS phone_cryptox_holdings (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -616,6 +842,364 @@ function Database.CreateTables()
             INDEX idx_receiver (receiver_number),
             INDEX idx_expires (expires_at),
             FOREIGN KEY (sharer_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
+            FOREIGN KEY (receiver_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Enhanced Finance Apps Tables
+    
+    -- Table 32: phone_bankr_transactions (Enhanced banking transactions)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_bankr_transactions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            account_id VARCHAR(50) NOT NULL,
+            transaction_type ENUM('credit', 'debit') NOT NULL,
+            amount DECIMAL(15, 2) NOT NULL,
+            description VARCHAR(255),
+            category VARCHAR(50) DEFAULT 'general',
+            recipient_number VARCHAR(20),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_account (account_id),
+            INDEX idx_type (transaction_type),
+            INDEX idx_category (category),
+            INDEX idx_created (created_at DESC),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 33: phone_bankr_budgets (Budget tracking)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_bankr_budgets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            category VARCHAR(50) NOT NULL,
+            monthly_limit DECIMAL(15, 2) NOT NULL,
+            current_spent DECIMAL(15, 2) DEFAULT 0,
+            period_start DATE NOT NULL,
+            period_end DATE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_category (category),
+            INDEX idx_period (period_start, period_end),
+            UNIQUE KEY unique_budget (owner_number, category, period_start),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 34: phone_bankr_recurring (Recurring payments)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_bankr_recurring (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            amount DECIMAL(15, 2) NOT NULL,
+            frequency ENUM('weekly', 'monthly', 'quarterly') NOT NULL,
+            recipient_number VARCHAR(20) NOT NULL,
+            next_payment TIMESTAMP NOT NULL,
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_next_payment (next_payment),
+            INDEX idx_active (is_active),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 35: phone_cryptox_holdings (Enhanced crypto holdings)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_cryptox_holdings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            crypto_symbol VARCHAR(20) NOT NULL,
+            amount DECIMAL(20, 8) NOT NULL,
+            avg_buy_price DECIMAL(20, 2) NOT NULL,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_symbol (crypto_symbol),
+            UNIQUE KEY unique_holding (owner_number, crypto_symbol),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 36: phone_cryptox_transactions (Enhanced crypto transactions)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_cryptox_transactions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            crypto_symbol VARCHAR(20) NOT NULL,
+            transaction_type ENUM('buy', 'sell') NOT NULL,
+            amount DECIMAL(20, 8) NOT NULL,
+            price_per_unit DECIMAL(20, 2) NOT NULL,
+            total_value DECIMAL(20, 2) NOT NULL,
+            order_type ENUM('market', 'limit') DEFAULT 'market',
+            fee DECIMAL(20, 2) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_symbol (crypto_symbol),
+            INDEX idx_type (transaction_type),
+            INDEX idx_created (created_at DESC),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 37: phone_cryptox_alerts (Price alerts)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_cryptox_alerts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            owner_number VARCHAR(20) NOT NULL,
+            crypto_symbol VARCHAR(20) NOT NULL,
+            alert_type ENUM('above', 'below') NOT NULL,
+            target_price DECIMAL(20, 2) NOT NULL,
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (owner_number),
+            INDEX idx_symbol (crypto_symbol),
+            INDEX idx_active (is_active),
+            FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Phase 13 Tables: Entertainment & Safety Apps
+    
+    -- Table 38: phone_musicly_playlists (Musicly playlists)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_musicly_playlists (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            description TEXT,
+            is_public BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_public (is_public),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 39: phone_musicly_playlist_tracks (Musicly playlist tracks)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_musicly_playlist_tracks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            playlist_id INT NOT NULL,
+            track_id VARCHAR(50) NOT NULL,
+            track_title VARCHAR(200) NOT NULL,
+            track_artist VARCHAR(200) NOT NULL,
+            track_duration INT NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_playlist (playlist_id),
+            INDEX idx_track (track_id),
+            FOREIGN KEY (playlist_id) REFERENCES phone_musicly_playlists(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 40: phone_musicly_play_history (Musicly play history)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_musicly_play_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            track_id VARCHAR(50) NOT NULL,
+            track_title VARCHAR(200) NOT NULL,
+            track_artist VARCHAR(200) NOT NULL,
+            play_duration INT DEFAULT 0,
+            played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_track (track_id),
+            INDEX idx_played (played_at DESC),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 41: phone_finder_devices (Finder tracked devices)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_finder_devices (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            device_name VARCHAR(100) NOT NULL,
+            device_type ENUM('phone', 'vehicle', 'other') NOT NULL,
+            device_id VARCHAR(50) NOT NULL,
+            last_location_x FLOAT,
+            last_location_y FLOAT,
+            last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_lost BOOLEAN DEFAULT FALSE,
+            is_online BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_device (device_id),
+            INDEX idx_lost (is_lost),
+            INDEX idx_online (is_online),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 42: phone_finder_settings (Finder user settings)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_finder_settings (
+            phone_number VARCHAR(20) PRIMARY KEY,
+            location_services BOOLEAN DEFAULT TRUE,
+            auto_refresh BOOLEAN DEFAULT TRUE,
+            sound_alerts BOOLEAN DEFAULT TRUE,
+            privacy_mode BOOLEAN DEFAULT FALSE,
+            data_retention_days INT DEFAULT 30,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 43: phone_safezone_contacts (SafeZone emergency contacts)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_safezone_contacts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            contact_name VARCHAR(100) NOT NULL,
+            contact_phone VARCHAR(20) NOT NULL,
+            relationship VARCHAR(50),
+            is_primary BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_primary (is_primary),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 44: phone_safezone_settings (SafeZone user settings)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_safezone_settings (
+            phone_number VARCHAR(20) PRIMARY KEY,
+            auto_alerts BOOLEAN DEFAULT TRUE,
+            location_sharing BOOLEAN DEFAULT TRUE,
+            police_alerts BOOLEAN DEFAULT TRUE,
+            silent_mode BOOLEAN DEFAULT FALSE,
+            emergency_timeout INT DEFAULT 30,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 45: phone_safezone_emergencies (SafeZone emergency records)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_safezone_emergencies (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            emergency_type ENUM('panic', 'medical', 'fire', 'police', 'other') NOT NULL,
+            location_x FLOAT,
+            location_y FLOAT,
+            status ENUM('active', 'resolved', 'cancelled') DEFAULT 'active',
+            contacts_notified TEXT,
+            police_notified BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            resolved_at TIMESTAMP NULL,
+            INDEX idx_owner (phone_number),
+            INDEX idx_status (status),
+            INDEX idx_created (created_at DESC),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 46: phone_safezone_calls (SafeZone emergency calls)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_safezone_calls (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            call_type ENUM('911', 'police', 'fire', 'medical', 'quick_dial') NOT NULL,
+            target_number VARCHAR(20),
+            duration INT DEFAULT 0,
+            status ENUM('completed', 'missed', 'declined') DEFAULT 'completed',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_type (call_type),
+            INDEX idx_created (created_at DESC),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 47: phone_voice_recordings (Voice Recorder recordings)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_voice_recordings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            phone_number VARCHAR(20) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            duration INT NOT NULL,
+            file_size INT NOT NULL,
+            quality ENUM('low', 'medium', 'high', 'ultra') DEFAULT 'medium',
+            file_path VARCHAR(500) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_owner (phone_number),
+            INDEX idx_created (created_at DESC),
+            INDEX idx_quality (quality),
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 48: phone_voice_recorder_settings (Voice Recorder user settings)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_voice_recorder_settings (
+            phone_number VARCHAR(20) PRIMARY KEY,
+            auto_save BOOLEAN DEFAULT TRUE,
+            background_recording BOOLEAN DEFAULT FALSE,
+            max_recording_length INT DEFAULT 600,
+            auto_cleanup BOOLEAN DEFAULT TRUE,
+            recording_quality ENUM('low', 'medium', 'high', 'ultra') DEFAULT 'medium',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 49: phone_shotz_post_media (Multiple media attachments per Shotz post)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_shotz_post_media (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            post_id INT NOT NULL,
+            media_id INT NOT NULL,
+            display_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_post (post_id),
+            INDEX idx_media (media_id),
+            UNIQUE KEY unique_post_media (post_id, media_id),
+            FOREIGN KEY (post_id) REFERENCES phone_shotz_posts(id) ON DELETE CASCADE,
+            FOREIGN KEY (media_id) REFERENCES phone_media(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Table 50: phone_modish_video_media (Multiple media attachments per Modish video post)
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_modish_video_media (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            video_id INT NOT NULL,
+            media_id INT NOT NULL,
+            display_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_video (video_id),
+            INDEX idx_media (media_id),
+            UNIQUE KEY unique_video_media (video_id, media_id),
+            FOREIGN KEY (video_id) REFERENCES phone_modish_videos(id) ON DELETE CASCADE,
+            FOREIGN KEY (media_id) REFERENCES phone_media(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]], {})
+    
+    -- Contact Sharing Tables
+    -- Table: phone_share_requests
+    MySQL:execute([[
+        CREATE TABLE IF NOT EXISTS phone_share_requests (
+            id VARCHAR(36) PRIMARY KEY,
+            sender_number VARCHAR(20) NOT NULL,
+            sender_name VARCHAR(100) NOT NULL,
+            receiver_number VARCHAR(20) NOT NULL,
+            receiver_name VARCHAR(100) NOT NULL,
+            status ENUM('pending', 'accepted', 'declined', 'expired') DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            responded_at TIMESTAMP NULL,
+            INDEX idx_sender (sender_number),
+            INDEX idx_receiver (receiver_number),
+            INDEX idx_status (status),
+            INDEX idx_expires (expires_at),
+            FOREIGN KEY (sender_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE,
             FOREIGN KEY (receiver_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]], {})

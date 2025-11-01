@@ -14,6 +14,7 @@ local function getDefaultSettings()
         notificationEnabled = true,
         soundEnabled = true,
         volume = Config.SettingsApp.defaultVolume or 50,
+        locale = Config.Locale or 'en',
         customSettings = {}
     }
 end
@@ -42,6 +43,21 @@ local function validateSettings(settings)
         local maxVol = Config.SettingsApp.maxVolume or 100
         if type(settings.volume) ~= 'number' or settings.volume < minVol or settings.volume > maxVol then
             return false, 'Invalid volume level'
+        end
+    end
+    
+    -- Validate locale
+    if settings.locale then
+        local validLocales = Config.SupportedLocales or {'en', 'ja', 'es', 'fr', 'de', 'pt'}
+        local validLocale = false
+        for _, locale in ipairs(validLocales) do
+            if settings.locale == locale then
+                validLocale = true
+                break
+            end
+        end
+        if not validLocale then
+            return false, 'Invalid locale'
         end
     end
     
@@ -83,6 +99,7 @@ function Settings.GetPlayerSettings(phoneNumber)
             notificationEnabled = result[1].notification_enabled,
             soundEnabled = result[1].sound_enabled,
             volume = result[1].volume,
+            locale = result[1].locale or 'en',
             customSettings = json.decode(result[1].settings_json or '{}')
         }
         
@@ -118,13 +135,14 @@ function Settings.CreatePlayerSettings(phoneNumber, settings)
     end
     
     local success = MySQL.insert.await([[
-        INSERT INTO phone_settings (phone_number, theme, notification_enabled, sound_enabled, volume, settings_json)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO phone_settings (phone_number, theme, notification_enabled, sound_enabled, volume, locale, settings_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             theme = VALUES(theme),
             notification_enabled = VALUES(notification_enabled),
             sound_enabled = VALUES(sound_enabled),
             volume = VALUES(volume),
+            locale = VALUES(locale),
             settings_json = VALUES(settings_json)
     ]], {
         phoneNumber,
@@ -132,6 +150,7 @@ function Settings.CreatePlayerSettings(phoneNumber, settings)
         settings.notificationEnabled,
         settings.soundEnabled,
         settings.volume,
+        settings.locale or 'en',
         json.encode(settings.customSettings or {})
     })
     
@@ -184,13 +203,14 @@ function Settings.UpdatePlayerSettings(phoneNumber, updates)
     -- Update database
     local success = MySQL.update.await([[
         UPDATE phone_settings
-        SET theme = ?, notification_enabled = ?, sound_enabled = ?, volume = ?, settings_json = ?
+        SET theme = ?, notification_enabled = ?, sound_enabled = ?, volume = ?, locale = ?, settings_json = ?
         WHERE phone_number = ?
     ]], {
         currentSettings.theme,
         currentSettings.notificationEnabled,
         currentSettings.soundEnabled,
         currentSettings.volume,
+        currentSettings.locale or 'en',
         json.encode(currentSettings.customSettings),
         phoneNumber
     })
@@ -326,6 +346,60 @@ RegisterNetEvent('phone:server:updateSetting', function(settingKey, settingValue
         TriggerClientEvent('phone:client:settingsUpdated', src, updatedSettings)
     else
         TriggerClientEvent('phone:client:settingsError', src, result or 'Failed to update setting')
+    end
+end)
+
+RegisterNetEvent('phone:server:setPlayerLocale', function(data)
+    local src = source
+    local phoneNumber = exports['your-phone-resource']:GetPlayerPhoneNumber(src)
+    
+    if not phoneNumber then
+        TriggerClientEvent('phone:client:localeUpdateResult', src, {
+            success = false,
+            message = 'Phone number not found'
+        })
+        return
+    end
+    
+    if not data or not data.locale then
+        TriggerClientEvent('phone:client:localeUpdateResult', src, {
+            success = false,
+            message = 'Locale is required'
+        })
+        return
+    end
+    
+    -- Validate locale
+    local validLocales = Config.SupportedLocales or {'en', 'ja', 'es', 'fr', 'de', 'pt'}
+    local isValid = false
+    for _, locale in ipairs(validLocales) do
+        if data.locale == locale then
+            isValid = true
+            break
+        end
+    end
+    
+    if not isValid then
+        TriggerClientEvent('phone:client:localeUpdateResult', src, {
+            success = false,
+            message = 'Invalid locale'
+        })
+        return
+    end
+    
+    -- Update locale setting
+    local success, result = Settings.UpdateSetting(phoneNumber, 'locale', data.locale)
+    
+    if success then
+        TriggerClientEvent('phone:client:localeUpdateResult', src, {
+            success = true,
+            locale = data.locale
+        })
+    else
+        TriggerClientEvent('phone:client:localeUpdateResult', src, {
+            success = false,
+            message = result or 'Failed to update locale'
+        })
     end
 end)
 

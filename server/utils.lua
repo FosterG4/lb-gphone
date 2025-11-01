@@ -18,7 +18,15 @@ ERROR_CODES = {
     PLAYER_OFFLINE = 'PLAYER_OFFLINE',
     INVALID_AMOUNT = 'INVALID_AMOUNT',
     CONTENT_TOO_LONG = 'CONTENT_TOO_LONG',
-    OPERATION_FAILED = 'OPERATION_FAILED'
+    OPERATION_FAILED = 'OPERATION_FAILED',
+    -- Contact Sharing Error Codes
+    SHARE_REQUEST_EXPIRED = 'SHARE_REQUEST_EXPIRED',
+    SHARE_REQUEST_NOT_FOUND = 'SHARE_REQUEST_NOT_FOUND',
+    PLAYER_TOO_FAR = 'PLAYER_TOO_FAR',
+    CONTACT_ALREADY_EXISTS = 'CONTACT_ALREADY_EXISTS',
+    CANNOT_SHARE_WITH_SELF = 'CANNOT_SHARE_WITH_SELF',
+    BROADCAST_NOT_ACTIVE = 'BROADCAST_NOT_ACTIVE',
+    PHONE_NOT_OPEN = 'PHONE_NOT_OPEN'
 }
 
 -- Error messages
@@ -38,7 +46,15 @@ ERROR_MESSAGES = {
     [ERROR_CODES.PLAYER_OFFLINE] = 'Player is not available',
     [ERROR_CODES.INVALID_AMOUNT] = 'Invalid amount',
     [ERROR_CODES.CONTENT_TOO_LONG] = 'Content exceeds maximum length',
-    [ERROR_CODES.OPERATION_FAILED] = 'Operation failed'
+    [ERROR_CODES.OPERATION_FAILED] = 'Operation failed',
+    -- Contact Sharing Error Messages
+    [ERROR_CODES.SHARE_REQUEST_EXPIRED] = 'Share request has expired',
+    [ERROR_CODES.SHARE_REQUEST_NOT_FOUND] = 'Share request not found',
+    [ERROR_CODES.PLAYER_TOO_FAR] = 'Player is too far away',
+    [ERROR_CODES.CONTACT_ALREADY_EXISTS] = 'Contact already exists',
+    [ERROR_CODES.CANNOT_SHARE_WITH_SELF] = 'Cannot share contact with yourself',
+    [ERROR_CODES.BROADCAST_NOT_ACTIVE] = 'Contact broadcast is not active',
+    [ERROR_CODES.PHONE_NOT_OPEN] = 'Phone must be open to share contacts'
 }
 
 -- Validate phone number format
@@ -319,6 +335,7 @@ local RATE_LIMITS = {
     bank = { limit = 5, window = 30000 }, -- 5 bank operations per 30 seconds
     chirper = { limit = 3, window = 60000 }, -- 3 chirps per minute
     crypto = { limit = 10, window = 30000 }, -- 10 crypto trades per 30 seconds
+    contact_share = { limit = 5, window = 60000 }, -- 5 contact share requests per minute
     default = { limit = 10, window = 10000 } -- Default: 10 per 10 seconds
 }
 
@@ -512,6 +529,11 @@ function LogSecurityEvent(source, eventType, details)
     end
 end
 
+-- Check specific rate limit for contact sharing
+function CheckContactShareRateLimit(source)
+    return CheckRateLimit(source, 'contact_share')
+end
+
 -- Export utility functions
 exports('ValidatePhoneNumber', ValidatePhoneNumber)
 exports('ValidateMessage', ValidateMessage)
@@ -525,3 +547,4 @@ exports('SuccessResponse', SuccessResponse)
 exports('CheckRateLimit', CheckRateLimit)
 exports('VerifyPhoneOwnership', VerifyPhoneOwnership)
 exports('VerifyFunds', VerifyFunds)
+exports('CheckContactShareRateLimit', CheckContactShareRateLimit)

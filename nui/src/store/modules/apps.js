@@ -5,10 +5,6 @@ export default {
   namespaced: true,
   
   state: {
-    bank: {
-      balance: 0,
-      transactions: []
-    },
     chirper: {
       feed: [],
       myChirps: []
@@ -16,6 +12,16 @@ export default {
     crypto: {
       portfolio: [],
       prices: {}
+    },
+    cryptox: {
+      portfolio: [],
+      transactions: [],
+      alerts: [],
+      prices: [],
+      analytics: {},
+      cashBalance: 0,
+      chartData: {},
+      isLoading: false
     },
     appstore: {
       availableApps: [],
@@ -25,28 +31,6 @@ export default {
   },
   
   mutations: {
-    // Bank mutations
-    setBalance(state, balance) {
-      state.bank.balance = balance
-    },
-    
-    setTransactions(state, transactions) {
-      state.bank.transactions = transactions || []
-    },
-    
-    addTransaction(state, transaction) {
-      state.bank.transactions.unshift(transaction)
-      
-      // Keep only the last 50 transactions
-      if (state.bank.transactions.length > 50) {
-        state.bank.transactions = state.bank.transactions.slice(0, 50)
-      }
-    },
-    
-    updateBalance(state, amount) {
-      state.bank.balance = amount
-    },
-    
     // Chirper mutations
     setChirperFeed(state, feed) {
       state.chirper.feed = feed || []
@@ -140,54 +124,61 @@ export default {
       if (index > -1) {
         state.appstore.installedApps.splice(index, 1)
       }
+    },
+    
+    // CryptoX mutations
+    setCryptoxData(state, data) {
+      state.cryptox.portfolio = data.portfolio || []
+      state.cryptox.transactions = data.transactions || []
+      state.cryptox.alerts = data.alerts || []
+      state.cryptox.prices = data.prices || []
+      state.cryptox.analytics = data.analytics || {}
+      state.cryptox.cashBalance = data.cashBalance || 0
+    },
+    
+    setCryptoxLoading(state, isLoading) {
+      state.cryptox.isLoading = isLoading
+    },
+    
+    updateCryptoxPrices(state, prices) {
+      state.cryptox.prices = prices
+    },
+    
+    addCryptoxTransaction(state, transaction) {
+      state.cryptox.transactions.unshift(transaction)
+      if (state.cryptox.transactions.length > 100) {
+        state.cryptox.transactions = state.cryptox.transactions.slice(0, 100)
+      }
+    },
+    
+    updateCryptoxPortfolio(state, portfolio) {
+      state.cryptox.portfolio = portfolio
+    },
+    
+    updateCryptoxCashBalance(state, balance) {
+      state.cryptox.cashBalance = balance
+    },
+    
+    addCryptoxAlert(state, alert) {
+      state.cryptox.alerts.push(alert)
+    },
+    
+    removeCryptoxAlert(state, alertId) {
+      const index = state.cryptox.alerts.findIndex(a => a.id === alertId)
+      if (index > -1) {
+        state.cryptox.alerts.splice(index, 1)
+      }
+    },
+    
+    setCryptoxChartData(state, { symbol, timeframe, data }) {
+      if (!state.cryptox.chartData[symbol]) {
+        state.cryptox.chartData[symbol] = {}
+      }
+      state.cryptox.chartData[symbol][timeframe] = data
     }
   },
   
   actions: {
-    // Fetch bank balance and transaction history
-    async fetchBankData({ commit }) {
-      try {
-        const response = await nuiCallback('getBankData', {})
-        if (response.success) {
-          commit('setBalance', response.balance || 0)
-          commit('setTransactions', response.transactions || [])
-        }
-        return response
-      } catch (error) {
-        console.error('Error fetching bank data:', error)
-        return { success: false, error: 'FETCH_FAILED' }
-      }
-    },
-    
-    // Transfer money to another player
-    async transferMoney({ commit }, { targetNumber, amount }) {
-      try {
-        const response = await nuiCallback('transferMoney', {
-          targetNumber,
-          amount
-        })
-        
-        if (response.success) {
-          // Update balance
-          commit('updateBalance', response.newBalance)
-          
-          // Add transaction to history
-          commit('addTransaction', {
-            id: Date.now(),
-            type: 'sent',
-            phoneNumber: targetNumber,
-            amount: amount,
-            timestamp: Date.now()
-          })
-        }
-        
-        return response
-      } catch (error) {
-        console.error('Error transferring money:', error)
-        return { success: false, error: 'TRANSFER_FAILED' }
-      }
-    },
-    
     // Fetch chirper feed and user's chirps
     async fetchChirperFeed({ commit }) {
       try {
@@ -330,6 +321,115 @@ export default {
       } catch (error) {
         console.error('Error uninstalling app:', error)
         return { success: false, error: 'UNINSTALL_FAILED' }
+      }
+    },
+    
+    // CryptoX actions
+    async fetchCryptoxData({ commit }) {
+      commit('setCryptoxLoading', true)
+      try {
+        const response = await nuiCallback('getCryptoxData', {})
+        if (response.success) {
+          commit('setCryptoxData', response)
+        }
+        return response
+      } catch (error) {
+        console.error('Error fetching CryptoX data:', error)
+        return { success: false, error: 'FETCH_FAILED' }
+      } finally {
+        commit('setCryptoxLoading', false)
+      }
+    },
+    
+    async cryptoxTrade({ commit }, tradeData) {
+      try {
+        const response = await nuiCallback('cryptoxTrade', tradeData)
+        
+        if (response.success) {
+          // Add transaction
+          commit('addCryptoxTransaction', {
+            id: Date.now(),
+            crypto_symbol: tradeData.cryptoSymbol,
+            transaction_type: tradeData.tradeType,
+            amount: tradeData.amount,
+            price_per_unit: response.price,
+            total_value: response.totalValue,
+            order_type: tradeData.orderType,
+            timestamp: Date.now()
+          })
+          
+          // Update cash balance
+          if (tradeData.tradeType === 'buy') {
+            commit('updateCryptoxCashBalance', response.newBalance || 0)
+          } else {
+            commit('updateCryptoxCashBalance', response.newBalance || 0)
+          }
+          
+          // Refresh portfolio data
+          const portfolioResponse = await nuiCallback('getCryptoxData', {})
+          if (portfolioResponse.success) {
+            commit('updateCryptoxPortfolio', portfolioResponse.portfolio)
+          }
+        }
+        
+        return response
+      } catch (error) {
+        console.error('Error trading crypto:', error)
+        return { success: false, error: 'TRADE_FAILED' }
+      }
+    },
+    
+    async cryptoxCreateAlert({ commit }, alertData) {
+      try {
+        const response = await nuiCallback('cryptoxCreateAlert', alertData)
+        
+        if (response.success) {
+          commit('addCryptoxAlert', {
+            id: Date.now(),
+            ...alertData,
+            isActive: true,
+            createdAt: Date.now()
+          })
+        }
+        
+        return response
+      } catch (error) {
+        console.error('Error creating price alert:', error)
+        return { success: false, error: 'ALERT_FAILED' }
+      }
+    },
+    
+    async cryptoxDeleteAlert({ commit }, alertId) {
+      try {
+        const response = await nuiCallback('cryptoxDeleteAlert', alertId)
+        
+        if (response.success) {
+          commit('removeCryptoxAlert', alertId)
+        }
+        
+        return response
+      } catch (error) {
+        console.error('Error deleting price alert:', error)
+        return { success: false, error: 'DELETE_ALERT_FAILED' }
+      }
+    },
+    
+    async fetchCryptoxChart({ commit }, { cryptoSymbol, timeframe }) {
+      try {
+        const response = await nuiCallback('getCryptoxChart', { cryptoSymbol, timeframe })
+        
+        if (response.success) {
+          commit('setCryptoxChartData', {
+            symbol: cryptoSymbol,
+            timeframe: timeframe,
+            data: response.data
+          })
+        }
+        
+        return response
+      } catch (error) {
+        console.error('Error fetching chart data:', error)
+        return { success: false, error: 'CHART_FAILED' }
       }
     }
   }

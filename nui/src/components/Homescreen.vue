@@ -2,20 +2,35 @@
   <div class="homescreen">
     <div class="wallpaper"></div>
 
-    <div class="app-grid">
-      <div
-        v-for="app in apps"
-        :key="app.id"
-        class="app-icon"
-        @click="openApp(app.id)"
-      >
-        <div class="icon-container" :style="{ background: app.color }">
-          <component :is="app.icon" />
+    <!-- App Grid -->
+    <div class="app-grid-container">
+      <div class="app-grid">
+        <div
+          v-for="app in visibleApps"
+          :key="app.id"
+          class="app-icon"
+          @click="openApp(app.id)"
+        >
+          <div class="icon-container" :style="{ background: app.color }">
+            <component :is="app.icon" />
+          </div>
+          <span class="app-name">{{ app.name }}</span>
         </div>
-        <span class="app-name">{{ app.name }}</span>
       </div>
     </div>
 
+    <!-- Page Indicators -->
+    <div class="page-indicators">
+      <div
+        v-for="page in totalPages"
+        :key="page"
+        class="page-dot"
+        :class="{ active: page === currentPage }"
+        @click="goToPage(page)"
+      ></div>
+    </div>
+
+    <!-- Dock -->
     <div class="dock">
       <div
         v-for="dockApp in dockApps"
@@ -32,6 +47,7 @@
 </template>
 
 <script>
+import { ref, computed } from "vue";
 import { h } from "vue";
 
 // SVG Icon Components
@@ -83,7 +99,24 @@ const PhoneIcon = () =>
     ]
   );
 
-const BankIcon = () =>
+const CameraIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("circle", { cx: "12", cy: "13", r: "3" }),
+      h("path", {
+        d: "M5 7h14l-2-2h-10l-2 2zm-3 4v8c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2z",
+      }),
+    ]
+  );
+
+const PhotosIcon = () =>
   h(
     "svg",
     {
@@ -94,7 +127,7 @@ const BankIcon = () =>
     },
     [
       h("path", {
-        d: "M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z",
+        d: "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z",
       }),
     ]
   );
@@ -164,22 +197,6 @@ const NotesIcon = () =>
     ]
   );
 
-const PhotosIcon = () =>
-  h(
-    "svg",
-    {
-      width: "32",
-      height: "32",
-      viewBox: "0 0 24 24",
-      fill: "white",
-    },
-    [
-      h("path", {
-        d: "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z",
-      }),
-    ]
-  );
-
 const MapsIcon = () =>
   h(
     "svg",
@@ -237,13 +254,125 @@ const AppStoreIcon = () =>
       viewBox: "0 0 24 24",
       fill: "white",
     },
-    [h("path", { d: "M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" })]
+    [
+      h("path", {
+        d: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
+      }),
+    ]
+  );
+
+const CryptoxIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", { 
+        d: "M3 3v18h18V3H3zm16 16H5V5h14v14z" 
+      }),
+      h("path", { 
+        d: "M7 7l10 10M17 7l-10 10" 
+      }),
+      h("circle", { 
+        cx: "12", 
+        cy: "12", 
+        r: "3" 
+      })
+    ]
+  );
+
+const MusiclyIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", {
+        d: "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z",
+      }),
+    ]
+  );
+
+const FinderIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", {
+        d: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+      }),
+    ]
+  );
+
+const SafeZoneIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", {
+        d: "M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V9.99h7V8h-7V6.3l7-3.11v5.8h7v2H12v2z",
+      }),
+    ]
+  );
+
+const VoiceRecorderIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", {
+        d: "M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
+      }),
+    ]
+  );
+
+const WalletIcon = () =>
+  h(
+    "svg",
+    {
+      width: "32",
+      height: "32",
+      viewBox: "0 0 24 24",
+      fill: "white",
+    },
+    [
+      h("path", {
+        d: "M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z",
+      }),
+      h("circle", { cx: "16", cy: "12", r: "1.5" }),
+    ]
   );
 
 export default {
   name: "Homescreen",
   emits: ["open-app"],
   setup(props, { emit }) {
+    const currentPage = ref(1);
+    const appsPerPage = 20; // 4x5 grid
+
     const apps = [
       {
         id: "contacts",
@@ -257,14 +386,19 @@ export default {
         color: "#34c759",
         icon: MessagesIcon,
       },
-      { id: "bank", name: "Bank", color: "#007aff", icon: BankIcon },
+      { id: "wallet", name: "Wallet", color: "#5856d6", icon: WalletIcon },
       { id: "chirper", name: "Chirper", color: "#1da1f2", icon: ChirperIcon },
       { id: "crypto", name: "Crypto", color: "#ff9500", icon: CryptoIcon },
+      { id: "cryptox", name: "CryptoX", color: "#059669", icon: CryptoxIcon },
       { id: "clock", name: "Clock", color: "#000000", icon: ClockIcon },
       { id: "notes", name: "Notes", color: "#ffcc00", icon: NotesIcon },
       { id: "photos", name: "Photos", color: "#ff3b30", icon: PhotosIcon },
       { id: "maps", name: "Maps", color: "#5ac8fa", icon: MapsIcon },
       { id: "weather", name: "Weather", color: "#5ac8fa", icon: WeatherIcon },
+      { id: "musicly", name: "Musicly", color: "#ff2d92", icon: MusiclyIcon },
+      { id: "finder", name: "Finder", color: "#00d4aa", icon: FinderIcon },
+      { id: "safezone", name: "SafeZone", color: "#ff3b30", icon: SafeZoneIcon },
+      { id: "voicerecorder", name: "Voice Recorder", color: "#ff9500", icon: VoiceRecorderIcon },
       {
         id: "appstore",
         name: "App Store",
@@ -281,16 +415,35 @@ export default {
 
     const dockApps = [
       { id: "dialer", name: "Phone", color: "#34c759", icon: PhoneIcon },
+      { id: "messages", name: "Messages", color: "#007aff", icon: MessagesIcon },
+      { id: "camera", name: "Camera", color: "#8e8e93", icon: CameraIcon },
+      { id: "photos", name: "Photos", color: "#ff3b30", icon: PhotosIcon },
     ];
+
+    const totalPages = computed(() => Math.ceil(apps.length / appsPerPage));
+
+    const visibleApps = computed(() => {
+      const startIndex = (currentPage.value - 1) * appsPerPage;
+      const endIndex = startIndex + appsPerPage;
+      return apps.slice(startIndex, endIndex);
+    });
 
     const openApp = (appId) => {
       emit("open-app", appId);
     };
 
+    const goToPage = (page) => {
+      currentPage.value = page;
+    };
+
     return {
       apps,
       dockApps,
+      currentPage,
+      totalPages,
+      visibleApps,
       openApp,
+      goToPage,
     };
   },
 };
@@ -302,7 +455,8 @@ export default {
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 20px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .wallpaper {
@@ -315,28 +469,38 @@ export default {
   z-index: 0;
 }
 
-.app-grid {
+.app-grid-container {
   flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px 20px 20px;
+  z-index: 1;
+}
+
+.app-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 100px;
-  gap: 20px;
-  padding: 20px 0;
-  z-index: 1;
-  align-content: start;
+  grid-template-rows: repeat(5, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 320px;
+  height: 100%;
+  max-height: 500px;
 }
 
 .app-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
+  user-select: none;
 }
 
 .app-icon:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 .icon-container {
@@ -346,101 +510,185 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
 }
 
 .app-icon:hover .icon-container {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
 .app-name {
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 0;
+  z-index: 1;
+}
+
+.page-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-dot.active {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.2);
+}
+
+.page-dot:hover {
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .dock {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 16px;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px 32px 20px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
-  border-radius: 24px;
+  border-radius: 28px;
   z-index: 1;
-  margin-bottom: 10px;
+  margin: 0 20px 20px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .dock-icon {
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
+  user-select: none;
 }
 
 .dock-icon:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 .dock-icon .icon-container {
   width: 64px;
   height: 64px;
   border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.dock-icon:hover .icon-container {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Responsive adjustments */
 @media (max-width: 1600px) and (max-height: 900px) {
-  .app-grid {
-    grid-auto-rows: 90px;
-    gap: 16px;
-  }
-
-  .icon-container {
-    width: 54px;
-    height: 54px;
-  }
-
-  .app-name {
-    font-size: 11px;
-  }
-
-  .dock-icon .icon-container {
-    width: 58px;
-    height: 58px;
-  }
-}
-
-@media (max-width: 1366px) and (max-height: 768px) {
-  .homescreen {
-    padding: 16px;
+  .app-grid-container {
+    padding: 50px 18px 18px 18px;
   }
 
   .app-grid {
-    grid-auto-rows: 80px;
-    gap: 12px;
-    padding: 16px 0;
+    gap: 20px;
+    max-width: 300px;
+    max-height: 450px;
   }
 
   .icon-container {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 13px;
   }
 
   .app-name {
     font-size: 10px;
+    max-width: 65px;
   }
 
   .dock {
-    padding: 12px;
-    border-radius: 20px;
+    gap: 20px;
+    padding: 14px 18px 28px 18px;
+    margin: 0 18px 18px 18px;
+    border-radius: 26px;
   }
 
   .dock-icon .icon-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 1366px) and (max-height: 768px) {
+  .app-grid-container {
+    padding: 40px 16px 16px 16px;
+  }
+
+  .app-grid {
+    gap: 16px;
+    max-width: 280px;
+    max-height: 400px;
+  }
+
+  .icon-container {
     width: 52px;
     height: 52px;
+    border-radius: 12px;
+  }
+
+  .app-name {
+    font-size: 9px;
+    max-width: 60px;
+  }
+
+  .page-indicators {
+    padding: 12px 0;
+  }
+
+  .page-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .dock {
+    gap: 18px;
+    padding: 12px 16px 24px 16px;
+    margin: 0 16px 16px 16px;
+    border-radius: 24px;
+  }
+
+  .dock-icon .icon-container {
+    width: 56px;
+    height: 56px;
     border-radius: 14px;
+  }
+}
+
+/* Animation for page transitions */
+.app-grid {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 </style>

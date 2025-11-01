@@ -1,241 +1,278 @@
 <template>
-  <div class="statusbar">
-    <div class="statusbar-left">
+  <div class="status-bar">
+    <div class="status-left">
       <span class="time">{{ currentTime }}</span>
     </div>
     
-    <div class="statusbar-right">
-      <div class="signal-icon" :class="signalClass">
-        <div class="signal-bar"></div>
-        <div class="signal-bar"></div>
-        <div class="signal-bar"></div>
-        <div class="signal-bar"></div>
+    <div class="status-center">
+      <div class="notch"></div>
+    </div>
+    
+    <div class="status-right">
+      <div class="signal-bars">
+        <div class="bar" :class="{ active: signalStrength >= 1 }"></div>
+        <div class="bar" :class="{ active: signalStrength >= 2 }"></div>
+        <div class="bar" :class="{ active: signalStrength >= 3 }"></div>
+        <div class="bar" :class="{ active: signalStrength >= 4 }"></div>
       </div>
       
-      <div class="battery-icon" :class="batteryClass">
-        <div class="battery-level" :style="{ width: batteryPercentage + '%' }"></div>
+      <div class="wifi-icon" :class="{ connected: wifiConnected }">
+        <WifiIcon />
+      </div>
+      
+      <div class="battery">
+        <div class="battery-level" :style="{ width: batteryLevel + '%' }"></div>
         <div class="battery-tip"></div>
       </div>
       
-      <span class="battery-percentage">{{ batteryPercentage }}%</span>
+      <span class="battery-percentage">{{ batteryLevel }}%</span>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from "vue";
+import { h } from "vue";
+
+const WifiIcon = () =>
+  h(
+    "svg",
+    {
+      width: "16",
+      height: "16",
+      viewBox: "0 0 24 24",
+      fill: "currentColor",
+    },
+    [
+      h("path", {
+        d: "M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z",
+      }),
+    ]
+  );
 
 export default {
-  name: 'Statusbar',
+  name: "Statusbar",
+  components: {
+    WifiIcon,
+  },
   setup() {
-    const currentTime = ref('')
-    const batteryPercentage = ref(100)
-    const signalStrength = ref(4)
-    let timeInterval = null
-    let batteryInterval = null
+    const currentTime = ref("");
+    const signalStrength = ref(4);
+    const wifiConnected = ref(true);
+    const batteryLevel = ref(87);
     
+    let timeInterval;
+
     const updateTime = () => {
-      const now = new Date()
-      const hours = now.getHours().toString().padStart(2, '0')
-      const minutes = now.getMinutes().toString().padStart(2, '0')
-      currentTime.value = `${hours}:${minutes}`
-    }
-    
-    const updateBattery = () => {
-      // Simulate battery drain (very slow)
-      if (batteryPercentage.value > 0) {
-        batteryPercentage.value = Math.max(0, batteryPercentage.value - 0.1)
-      }
-    }
-    
-    const signalClass = computed(() => {
-      return `signal-strength-${signalStrength.value}`
-    })
-    
-    const batteryClass = computed(() => {
-      if (batteryPercentage.value <= 20) return 'battery-low'
-      if (batteryPercentage.value <= 50) return 'battery-medium'
-      return 'battery-high'
-    })
-    
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      currentTime.value = `${hours}:${minutes}`;
+    };
+
     onMounted(() => {
-      updateTime()
-      timeInterval = setInterval(updateTime, 1000)
-      batteryInterval = setInterval(updateBattery, 60000) // Update every minute
-    })
-    
+      updateTime();
+      timeInterval = setInterval(updateTime, 1000);
+    });
+
     onUnmounted(() => {
-      if (timeInterval) clearInterval(timeInterval)
-      if (batteryInterval) clearInterval(batteryInterval)
-    })
-    
+      if (timeInterval) {
+        clearInterval(timeInterval);
+      }
+    });
+
     return {
       currentTime,
-      batteryPercentage,
-      signalClass,
-      batteryClass
-    }
-  }
-}
+      signalStrength,
+      wifiConnected,
+      batteryLevel,
+    };
+  },
+};
 </script>
 
 <style scoped>
-.statusbar {
+.status-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 8px 20px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  justify-content: space-between;
+  padding: 8px 20px 8px 20px;
+  background: transparent;
+  color: white;
   font-size: 14px;
   font-weight: 600;
   height: 44px;
   position: relative;
-  z-index: 5;
+  z-index: 1000;
 }
 
-.statusbar-left {
+.status-left {
+  flex: 1;
   display: flex;
   align-items: center;
 }
 
 .time {
-  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.statusbar-right {
+.status-center {
+  flex: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.notch {
+  width: 120px;
+  height: 24px;
+  background: #000;
+  border-radius: 0 0 12px 12px;
+  position: relative;
+}
+
+.status-right {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
-.signal-icon {
+.signal-bars {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 14px;
+  height: 12px;
 }
 
-.signal-bar {
+.bar {
   width: 3px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 1px;
   transition: background 0.3s;
 }
 
-.signal-bar:nth-child(1) {
-  height: 4px;
+.bar:nth-child(1) { height: 3px; }
+.bar:nth-child(2) { height: 6px; }
+.bar:nth-child(3) { height: 9px; }
+.bar:nth-child(4) { height: 12px; }
+
+.bar.active {
+  background: white;
 }
 
-.signal-bar:nth-child(2) {
-  height: 7px;
+.wifi-icon {
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.3s;
 }
 
-.signal-bar:nth-child(3) {
-  height: 10px;
+.wifi-icon.connected {
+  color: white;
 }
 
-.signal-bar:nth-child(4) {
-  height: 13px;
-}
-
-.signal-strength-4 .signal-bar {
-  background: #fff;
-}
-
-.signal-strength-3 .signal-bar:nth-child(-n+3) {
-  background: #fff;
-}
-
-.signal-strength-2 .signal-bar:nth-child(-n+2) {
-  background: #fff;
-}
-
-.signal-strength-1 .signal-bar:nth-child(1) {
-  background: #fff;
-}
-
-.battery-icon {
+.battery {
   position: relative;
   width: 24px;
   height: 12px;
-  border: 2px solid #fff;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  padding: 1px;
+  border: 1px solid white;
+  border-radius: 2px;
+  background: transparent;
 }
 
 .battery-level {
   height: 100%;
-  background: #fff;
+  background: white;
   border-radius: 1px;
-  transition: width 0.3s, background 0.3s;
-}
-
-.battery-low .battery-level {
-  background: #ff3b30;
-}
-
-.battery-medium .battery-level {
-  background: #ff9500;
-}
-
-.battery-high .battery-level {
-  background: #34c759;
+  transition: width 0.3s;
 }
 
 .battery-tip {
   position: absolute;
-  right: -4px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: -3px;
+  top: 3px;
   width: 2px;
   height: 6px;
-  background: #fff;
+  background: white;
   border-radius: 0 1px 1px 0;
 }
 
 .battery-percentage {
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Responsive adjustments */
+/* Dark theme support */
+.dark .status-bar {
+  color: white;
+}
+
+.light .status-bar {
+  color: #1c1c1e;
+}
+
+.light .bar.active {
+  background: #1c1c1e;
+}
+
+.light .wifi-icon.connected {
+  color: #1c1c1e;
+}
+
+.light .battery {
+  border-color: #1c1c1e;
+}
+
+.light .battery-level {
+  background: #1c1c1e;
+}
+
+.light .battery-tip {
+  background: #1c1c1e;
+}
+
+/* Responsive design */
 @media (max-width: 1600px) and (max-height: 900px) {
-  .statusbar {
-    padding: 6px 16px;
+  .status-bar {
+    padding: 6px 18px;
     height: 40px;
-    font-size: 13px;
   }
-  
-  .battery-percentage {
-    font-size: 11px;
+
+  .time {
+    font-size: 15px;
+  }
+
+  .notch {
+    width: 110px;
+    height: 22px;
   }
 }
 
 @media (max-width: 1366px) and (max-height: 768px) {
-  .statusbar {
-    padding: 6px 12px;
+  .status-bar {
+    padding: 4px 16px;
     height: 36px;
-    font-size: 12px;
   }
-  
-  .signal-icon {
-    height: 12px;
+
+  .time {
+    font-size: 14px;
   }
-  
-  .signal-bar {
-    width: 2px;
+
+  .notch {
+    width: 100px;
+    height: 20px;
   }
-  
-  .battery-icon {
+
+  .battery {
     width: 20px;
     height: 10px;
   }
-  
+
   .battery-percentage {
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 </style>

@@ -28,6 +28,8 @@ client_scripts {
     'client/location.lua',
     'client/vehicle.lua',
     'client/property.lua',
+    'client/music.lua',
+    'client/contact_sharing.lua',
     'client/media/camera.lua',
     'client/media/video.lua',
     'client/media/audio.lua'
@@ -38,9 +40,17 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/utils.lua',
     'server/database.lua',
+    'server/locale.lua',
+    'server/locales/en.lua',
+    'server/locales/ja.lua',
+    'server/locales/es.lua',
+    'server/locales/fr.lua',
+    'server/locales/de.lua',
+    'server/locales/pt.lua',
     'server/main.lua',
     'server/phone_numbers.lua',
     'server/contacts.lua',
+    'server/contact_sharing.lua',
     'server/messages.lua',
     'server/calls.lua',
     'server/framework/adapter.lua',
@@ -50,7 +60,7 @@ server_scripts {
     'server/framework/standalone.lua',
     'server/framework/garage_adapter.lua',
     'server/framework/housing_adapter.lua',
-    'server/apps/bank.lua',
+    'server/apps/wallet.lua',
     'server/apps/chirper.lua',
     'server/apps/crypto.lua',
     'server/apps/settings.lua',
@@ -63,6 +73,12 @@ server_scripts {
     'server/apps/home.lua',
     'server/apps/shotz.lua',
     'server/apps/modish.lua',
+    'server/apps/marketplace.lua',
+    'server/apps/pages.lua',
+    'server/apps/musicly.lua',
+    'server/apps/finder.lua',
+    'server/apps/safezone.lua',
+    'server/apps/voice_recorder.lua',
     'server/media/storage.lua',
     'server/media/photos.lua',
     'server/media/videos.lua',
@@ -70,6 +86,9 @@ server_scripts {
     'server/media/sharing.lua',
     'server/media/albums.lua'
 }
+
+-- Tests are located in tests/ directory and should be run manually
+-- They are not loaded as part of the resource
 
 -- NUI
 ui_page 'nui/dist/index.html'

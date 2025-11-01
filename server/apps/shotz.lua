@@ -28,6 +28,8 @@ RegisterNetEvent('phone:server:getShotzFeed', function(data)
     local offset = data.offset or 0
     
     -- Get feed (all posts, ordered by newest first)
+    -- Note: file_url supports both local (nui://) and Fivemanage (https://) URLs
+    -- The URL format is determined by Config.MediaStorage when media is uploaded
     local feed = MySQL.query.await([[
         SELECT 
             p.id,
@@ -50,6 +52,49 @@ RegisterNetEvent('phone:server:getShotzFeed', function(data)
         limit,
         offset
     })
+    
+    -- Fetch additional media attachments for posts with multiple media
+    if feed and #feed > 0 then
+        for _, post in ipairs(feed) do
+            local additionalMedia = MySQL.query.await([[
+                SELECT 
+                    m.id,
+                    m.file_url,
+                    m.thumbnail_url,
+                    m.media_type,
+                    pm.display_order
+                FROM phone_shotz_post_media pm
+                INNER JOIN phone_media m ON pm.media_id = m.id
+                WHERE pm.post_id = ?
+                ORDER BY pm.display_order ASC
+            ]], {
+                post.id
+            })
+            
+            if additionalMedia and #additionalMedia > 0 then
+                -- Create media array with all attachments
+                post.media = {}
+                -- Add primary media first
+                table.insert(post.media, {
+                    id = post.id,
+                    url = post.media_url,
+                    thumbnail_url = post.thumbnail_url,
+                    media_type = post.media_type,
+                    display_order = 0
+                })
+                -- Add additional media
+                for _, media in ipairs(additionalMedia) do
+                    table.insert(post.media, {
+                        id = media.id,
+                        url = media.file_url,
+                        thumbnail_url = media.thumbnail_url,
+                        media_type = media.media_type,
+                        display_order = media.display_order
+                    })
+                end
+            end
+        end
+    end
     
     -- Get user's liked posts
     local likedPosts = MySQL.query.await([[
@@ -105,6 +150,7 @@ RegisterNetEvent('phone:server:getMyShotzPosts', function()
         return
     end
     
+    -- Get user's own posts with media URLs (supports both local and Fivemanage URLs)
     local myPosts = MySQL.query.await([[
         SELECT 
             p.id,
@@ -126,6 +172,49 @@ RegisterNetEvent('phone:server:getMyShotzPosts', function()
     ]], {
         phoneNumber
     })
+    
+    -- Fetch additional media attachments for posts with multiple media
+    if myPosts and #myPosts > 0 then
+        for _, post in ipairs(myPosts) do
+            local additionalMedia = MySQL.query.await([[
+                SELECT 
+                    m.id,
+                    m.file_url,
+                    m.thumbnail_url,
+                    m.media_type,
+                    pm.display_order
+                FROM phone_shotz_post_media pm
+                INNER JOIN phone_media m ON pm.media_id = m.id
+                WHERE pm.post_id = ?
+                ORDER BY pm.display_order ASC
+            ]], {
+                post.id
+            })
+            
+            if additionalMedia and #additionalMedia > 0 then
+                -- Create media array with all attachments
+                post.media = {}
+                -- Add primary media first
+                table.insert(post.media, {
+                    id = post.id,
+                    url = post.media_url,
+                    thumbnail_url = post.thumbnail_url,
+                    media_type = post.media_type,
+                    display_order = 0
+                })
+                -- Add additional media
+                for _, media in ipairs(additionalMedia) do
+                    table.insert(post.media, {
+                        id = media.id,
+                        url = media.file_url,
+                        thumbnail_url = media.thumbnail_url,
+                        media_type = media.media_type,
+                        display_order = media.display_order
+                    })
+                end
+            end
+        end
+    end
     
     TriggerClientEvent('phone:client:receiveMyShotzPosts', source, {
         success = true,
@@ -184,18 +273,49 @@ RegisterNetEvent('phone:server:createShotzPost', function(data)
         return
     end
     
-    local mediaId = tonumber(data.mediaId)
+    -- Support both single mediaId (backward compatibility) and mediaIds array (new feature)
+    local mediaIds = {}
+    if data.mediaIds and type(data.mediaIds) == 'table' and #data.mediaIds > 0 then
+        -- New format: array of media IDs
+        for _, id in ipairs(data.mediaIds) do
+            local numId = tonumber(id)
+            if numId then
+                table.insert(mediaIds, numId)
+            end
+        end
+    elseif data.mediaId then
+        -- Old format: single media ID (backward compatibility)
+        local numId = tonumber(data.mediaId)
+        if numId then
+            table.insert(mediaIds, numId)
+        end
+    end
+    
     local caption = data.caption or ''
     local isLive = data.isLive or false
     
     -- Validation
-    if not mediaId then
+    if #mediaIds == 0 then
         TriggerClientEvent('phone:client:createShotzPostResult', source, {
             success = false,
-            message = 'Invalid media ID'
+            message = 'Invalid media ID(s)'
         })
         return
     end
+    
+    -- Limit number of media attachments per post
+    local maxMediaPerPost = Config.Shotz and Config.Shotz.maxMediaPerPost or 10
+    if #mediaIds > maxMediaPerPost then
+        TriggerClientEvent('phone:client:createShotzPostResult', source, {
+            success = false,
+            message = string.format('Maximum %d media items per post', maxMediaPerPost)
+        })
+        return
+    end
+    
+    -- Note: Media upload (including Fivemanage) is handled by Storage.HandleUpload()
+    -- before this function is called. The mediaIds reference phone_media table which
+    -- already contains the Fivemanage URL if Config.MediaStorage = 'fivemanage'
     
     -- Trim caption
     caption = caption:gsub("^%s*(.-)%s*$", "%1")
@@ -230,28 +350,45 @@ RegisterNetEvent('phone:server:createShotzPost', function(data)
         return
     end
     
-    -- Verify media ownership
-    local media = MySQL.query.await([[
+    -- Verify media ownership for all media IDs
+    -- Media can be stored locally or on Fivemanage - both are supported
+    local mediaPlaceholders = table.concat(string.rep('?,', #mediaIds):sub(1, -2):split(','), ',')
+    local queryParams = {}
+    for _, id in ipairs(mediaIds) do
+        table.insert(queryParams, id)
+    end
+    table.insert(queryParams, phoneNumber)
+    
+    local media = MySQL.query.await(string.format([[
         SELECT id, media_type, file_url, thumbnail_url
         FROM phone_media
-        WHERE id = ? AND owner_number = ?
-    ]], {
-        mediaId,
-        phoneNumber
-    })
+        WHERE id IN (%s) AND owner_number = ?
+    ]], mediaPlaceholders), queryParams)
     
-    if not media or #media == 0 then
+    if not media or #media ~= #mediaIds then
         TriggerClientEvent('phone:client:createShotzPostResult', source, {
             success = false,
-            message = 'Media not found or you do not own this media'
+            message = 'One or more media items not found or you do not own them'
         })
         return
+    end
+    
+    -- Use the first media item as the primary media for the post (for backward compatibility)
+    local primaryMediaId = mediaIds[1]
+    
+    -- Log media source for debugging (if enabled)
+    if Config.DebugMode then
+        for _, mediaItem in ipairs(media) do
+            local storageType = mediaItem.file_url:match('^https://') and 'Fivemanage/CDN' or 'Local'
+            print(string.format('[Phone] [Shotz] Creating post with %s media - ID: %d, URL: %s', 
+                storageType, mediaItem.id, mediaItem.file_url))
+        end
     end
     
     -- Get author name
     local authorName = Framework:GetPlayerName(source) or phoneNumber
     
-    -- Insert post into database
+    -- Insert post into database with primary media
     local insertId = MySQL.insert.await([[
         INSERT INTO phone_shotz_posts (author_number, author_name, caption, media_id, likes, comments, shares, is_live)
         VALUES (?, ?, ?, ?, 0, 0, 0, ?)
@@ -259,7 +396,7 @@ RegisterNetEvent('phone:server:createShotzPost', function(data)
         phoneNumber,
         authorName,
         caption,
-        mediaId,
+        primaryMediaId,
         isLive
     })
     
@@ -269,6 +406,24 @@ RegisterNetEvent('phone:server:createShotzPost', function(data)
             message = 'Failed to create post'
         })
         return
+    end
+    
+    -- Insert additional media attachments into junction table (if multiple media)
+    if #mediaIds > 1 then
+        for i, mediaId in ipairs(mediaIds) do
+            MySQL.insert.await([[
+                INSERT INTO phone_shotz_post_media (post_id, media_id, display_order)
+                VALUES (?, ?, ?)
+            ]], {
+                insertId,
+                mediaId,
+                i - 1  -- 0-indexed display order
+            })
+        end
+        
+        if Config.DebugMode then
+            print(string.format('[Phone] [Shotz] Added %d media attachments to post ID: %d', #mediaIds, insertId))
+        end
     end
     
     -- Update cooldown
@@ -308,6 +463,47 @@ RegisterNetEvent('phone:server:createShotzPost', function(data)
     if post and #post > 0 then
         post[1].isLiked = false
         post[1].isFollowing = false
+        
+        -- Fetch additional media attachments if multiple media
+        if #mediaIds > 1 then
+            local additionalMedia = MySQL.query.await([[
+                SELECT 
+                    m.id,
+                    m.file_url,
+                    m.thumbnail_url,
+                    m.media_type,
+                    pm.display_order
+                FROM phone_shotz_post_media pm
+                INNER JOIN phone_media m ON pm.media_id = m.id
+                WHERE pm.post_id = ?
+                ORDER BY pm.display_order ASC
+            ]], {
+                insertId
+            })
+            
+            if additionalMedia and #additionalMedia > 0 then
+                -- Create media array with all attachments
+                post[1].media = {}
+                -- Add primary media first
+                table.insert(post[1].media, {
+                    id = post[1].id,
+                    url = post[1].media_url,
+                    thumbnail_url = post[1].thumbnail_url,
+                    media_type = post[1].media_type,
+                    display_order = 0
+                })
+                -- Add additional media
+                for _, media in ipairs(additionalMedia) do
+                    table.insert(post[1].media, {
+                        id = media.id,
+                        url = media.file_url,
+                        thumbnail_url = media.thumbnail_url,
+                        media_type = media.media_type,
+                        display_order = media.display_order
+                    })
+                end
+            end
+        end
         
         -- Send success response to poster
         TriggerClientEvent('phone:client:createShotzPostResult', source, {

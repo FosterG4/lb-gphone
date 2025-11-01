@@ -1,6 +1,7 @@
 -- Server Main
 -- Handles server initialization and player management
 
+local ConfigValidator = require('server.config_validator')
 local Database = require('server.database')
 local Contacts = require('server.contacts')
 local playerPhoneNumbers = {} -- Cache for player phone numbers
@@ -36,6 +37,24 @@ end
 -- Initialize resource
 CreateThread(function()
     print('^2[Phone] ^7Initializing smartphone system...')
+    
+    -- Run installation checks first
+    local InstallationManager = require('server.install')
+    local installSuccess = InstallationManager:Run()
+    
+    if not installSuccess then
+        print('^1[Phone] ^7Installation checks failed! Please fix the errors above.')
+        print('^1[Phone] ^7Resource initialization aborted.')
+        return
+    end
+    
+    -- Validate configuration
+    local configValid = ConfigValidator.ValidateAll()
+    if not configValid then
+        print('^1[Phone] ^7Configuration validation failed! Please fix the errors above.')
+        print('^1[Phone] ^7Resource initialization aborted.')
+        return
+    end
     
     -- Initialize database
     local dbSuccess = Database.Initialize()
@@ -245,6 +264,22 @@ end
 -- Export framework functions for other resources
 exports('GetFramework', GetFramework)
 exports('GetPlayerPhoneNumber', GetCachedPhoneNumber)
+exports('ValidateConfig', function() return ConfigValidator.ValidateAll() end)
+exports('GetConfigValidationResults', function() return ConfigValidator.GetResults() end)
+
+-- Export installation functions
+exports('GetInstallationStatus', function()
+    local InstallationManager = require('server.install')
+    return {
+        complete = InstallationManager:IsComplete(),
+        errors = InstallationManager:GetErrors(),
+        warnings = InstallationManager:GetWarnings()
+    }
+end)
+exports('RunInstallation', function()
+    local InstallationManager = require('server.install')
+    return InstallationManager:Run()
+end)
 
 -- Cleanup on resource stop
 AddEventHandler('onResourceStop', function(resourceName)
@@ -257,6 +292,8 @@ end)
 require('server.media.photos')
 require('server.media.videos')
 require('server.media.audio')
+require('server.media.migration')
+require('server.media.testing')
 
 
 -- Media Management Event Handlers

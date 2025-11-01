@@ -292,6 +292,55 @@ local availableApps = {
         enabled = true
     },
     {
+        id = 'bankr',
+        name = 'Bankr',
+        icon = '💳',
+        category = 'finance',
+        shortDescription = 'Advanced banking platform',
+        description = 'Enhanced banking experience with advanced features. Manage multiple accounts, set budgets, create recurring payments, and analyze your spending patterns.',
+        developer = 'FiveM Phone',
+        version = '2.0.0',
+        size = '5.2 MB',
+        rating = 4.9,
+        ratingCount = 1580,
+        screenshots = {'screenshot1', 'screenshot2', 'screenshot3'},
+        features = {
+            'Multiple account management',
+            'Advanced transaction filtering',
+            'Budget tracking and alerts',
+            'Recurring payment automation',
+            'Spending analytics dashboard',
+            'Enhanced transfer interface'
+        },
+        isCore = false,
+        enabled = true
+    },
+    {
+        id = 'cryptox',
+        name = 'CryptoX',
+        icon = '📈',
+        category = 'finance',
+        shortDescription = 'Professional crypto trading',
+        description = 'Advanced cryptocurrency trading platform with professional tools. Real-time charts, price alerts, portfolio analytics, and comprehensive trading features.',
+        developer = 'FiveM Phone',
+        version = '2.0.0',
+        size = '6.8 MB',
+        rating = 4.8,
+        ratingCount = 1240,
+        screenshots = {'screenshot1', 'screenshot2', 'screenshot3', 'screenshot4'},
+        features = {
+            'Real-time price charts',
+            'Advanced trading interface',
+            'Portfolio analytics',
+            'Price alerts and notifications',
+            'Market and limit orders',
+            'Historical data analysis',
+            'Profit/loss tracking'
+        },
+        isCore = false,
+        enabled = true
+    },
+    {
         id = 'garage',
         name = 'Garage',
         icon = '🚗',
@@ -334,6 +383,147 @@ local availableApps = {
         },
         isCore = false,
         enabled = Config.HomeApp and Config.HomeApp.enabled or false
+    },
+    {
+        id = 'marketplace',
+        name = 'Marketplace',
+        icon = '🛒',
+        category = 'commerce',
+        shortDescription = 'Buy and sell items',
+        description = 'Browse and list items for sale. Connect with other players to buy and sell goods in a secure marketplace.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '4.2 MB',
+        rating = 4.6,
+        ratingCount = 950,
+        screenshots = {'screenshot1', 'screenshot2'},
+        features = {
+            'Browse listings',
+            'Create your own listings',
+            'Search and filter items',
+            'Secure transactions'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.marketplace or false
+    },
+    {
+        id = 'pages',
+        name = 'Business Pages',
+        icon = '🏢',
+        category = 'business',
+        shortDescription = 'Business directory and pages',
+        description = 'Discover local businesses and create your own business page. Connect with customers and promote your services.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '3.8 MB',
+        rating = 4.7,
+        ratingCount = 780,
+        screenshots = {'screenshot1', 'screenshot2'},
+        features = {
+            'Business directory',
+            'Create business pages',
+            'Follow businesses',
+            'View business statistics'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.pages or false
+    },
+    -- Phase 13: Entertainment & Safety Apps
+    {
+        id = 'musicly',
+        name = 'Musicly',
+        icon = '🎵',
+        category = 'entertainment',
+        shortDescription = 'Music streaming and playlists',
+        description = 'Stream your favorite music, create playlists, and discover new tracks. Enjoy background playback and radio stations.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '5.4 MB',
+        rating = 4.8,
+        ratingCount = 1420,
+        screenshots = {'screenshot1', 'screenshot2', 'screenshot3'},
+        features = {
+            'Music streaming',
+            'Playlist management',
+            'Radio stations',
+            'Background playback',
+            'Volume control',
+            'Shuffle and repeat modes'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.musicly or false
+    },
+    {
+        id = 'finder',
+        name = 'Finder',
+        icon = '📍',
+        category = 'utilities',
+        shortDescription = 'Device tracking and locator',
+        description = 'Track your devices and vehicles. Find lost items with sound alerts and real-time location tracking.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '3.2 MB',
+        rating = 4.7,
+        ratingCount = 980,
+        screenshots = {'screenshot1', 'screenshot2'},
+        features = {
+            'Device tracking',
+            'Map view with locations',
+            'Sound alerts for lost devices',
+            'Last seen timestamps',
+            'Vehicle integration',
+            'Auto-refresh locations'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.finder or false
+    },
+    {
+        id = 'safezone',
+        name = 'SafeZone',
+        icon = '🚨',
+        category = 'safety',
+        shortDescription = 'Emergency alerts and safety',
+        description = 'Emergency response system with panic button, emergency contacts, and police alerts. Stay safe with quick access to help.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '2.8 MB',
+        rating = 4.9,
+        ratingCount = 1650,
+        screenshots = {'screenshot1', 'screenshot2'},
+        features = {
+            'Emergency panic button',
+            'Emergency contacts management',
+            'Quick dial emergency numbers',
+            'Police alert system',
+            'Location sharing',
+            'Safety tips and resources'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.safezone or false
+    },
+    {
+        id = 'voicerecorder',
+        name = 'Voice Recorder',
+        icon = '🎙️',
+        category = 'productivity',
+        shortDescription = 'Record and manage voice memos',
+        description = 'Record high-quality voice memos and manage your recordings. Share recordings and organize your audio files.',
+        developer = 'FiveM Phone',
+        version = '1.0.0',
+        size = '3.6 MB',
+        rating = 4.6,
+        ratingCount = 840,
+        screenshots = {'screenshot1', 'screenshot2'},
+        features = {
+            'High-quality voice recording',
+            'Recording playback controls',
+            'File management and organization',
+            'Share recordings to messages',
+            'Multiple audio formats',
+            'Background recording support'
+        },
+        isCore = false,
+        enabled = Config.EnabledApps and Config.EnabledApps.voicerecorder or false
     }
 }
 

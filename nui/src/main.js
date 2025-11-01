@@ -2,12 +2,15 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import store from './store'
+import i18n from './i18n'
 import './assets/styles.css'
 import './assets/themes.css'
+import './assets/ios-styles.css'
 
 const app = createApp(App)
 
 app.use(store)
+app.use(i18n)
 
 app.mount('#app')
 
@@ -103,11 +106,23 @@ window.addEventListener('message', (event) => {
             // Handle settings loaded from server
             if (data.settings) {
                 store.commit('settings/setAllSettings', data.settings)
+                // Load locale from settings
+                if (data.settings.locale) {
+                    import('./i18n').then(({ loadLocaleFromSettings }) => {
+                        loadLocaleFromSettings(data.settings)
+                    })
+                }
             }
         } else if (action === 'settingsUpdated') {
             // Handle settings updated from server
             if (data.settings) {
                 store.commit('settings/setAllSettings', data.settings)
+                // Update locale if changed
+                if (data.settings.locale) {
+                    import('./i18n').then(({ loadLocaleFromSettings }) => {
+                        loadLocaleFromSettings(data.settings)
+                    })
+                }
             }
         } else if (action === 'settingsError') {
             // Handle settings error
@@ -115,6 +130,21 @@ window.addEventListener('message', (event) => {
                 type: 'error',
                 title: 'Settings Error',
                 message: data.error || 'Failed to update settings'
+            })
+        } else if (action === 'showShareDeclinedNotification') {
+            // Handle share declined notification
+            import('./utils/notifications').then(({ showShareDeclinedNotification }) => {
+                showShareDeclinedNotification(data.contactName, i18n.global)
+            })
+        } else if (action === 'showShareErrorNotification') {
+            // Handle share error notification
+            import('./utils/notifications').then(({ showShareErrorNotification }) => {
+                showShareErrorNotification(data.errorMessage, null, i18n.global)
+            })
+        } else if (action === 'showBroadcastContactAddedNotification') {
+            // Handle broadcast contact added notification
+            import('./utils/notifications').then(({ showBroadcastContactAddedNotification }) => {
+                showBroadcastContactAddedNotification(data.addedBy, i18n.global)
             })
         }
     } catch (error) {

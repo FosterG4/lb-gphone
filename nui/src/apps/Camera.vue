@@ -1,5 +1,14 @@
 <template>
   <div class="camera-app">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="time">12:44</span>
+      <div class="status-icons">
+        <span class="signal-icon">📶</span>
+        <span class="battery-icon">🔋</span>
+      </div>
+    </div>
+
     <!-- Camera Viewfinder -->
     <div class="camera-viewfinder" :class="{ 'recording': isRecording }">
       <div class="viewfinder-overlay">
@@ -14,64 +23,144 @@
         
         <!-- Top Controls -->
         <div class="camera-top-controls">
-          <button class="control-btn" @click="toggleFlash" v-if="config.enableFlash">
-            <i :class="flashEnabled ? 'icon-flash-on' : 'icon-flash-off'"></i>
+          <button 
+            class="control-btn flash-btn" 
+            @click="toggleFlash" 
+            v-if="config.enableFlash"
+            :aria-label="flashEnabled ? 'Turn off flash' : 'Turn on flash'"
+            :aria-pressed="flashEnabled"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path v-if="flashEnabled" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/>
+              <path v-else d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
           </button>
           
-          <button class="control-btn" @click="cycleFilter">
-            <i class="icon-filter"></i>
-            <span class="filter-name">{{ currentFilter }}</span>
+          <button 
+            class="control-btn grid-btn" 
+            @click="toggleGrid"
+            :aria-label="showGrid ? 'Hide grid lines' : 'Show grid lines'"
+            :aria-pressed="showGrid"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2" fill="none"/>
+            </svg>
           </button>
           
-          <button class="control-btn" @click="flipCamera" v-if="config.enableCameraFlip">
-            <i class="icon-flip"></i>
+          <button 
+            class="control-btn flip-btn" 
+            @click="flipCamera" 
+            v-if="config.enableCameraFlip"
+            aria-label="Flip camera"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="11" r="3" stroke="currentColor" stroke-width="2"/>
+              <path d="m8 2 4-2 4 2" stroke="currentColor" stroke-width="2"/>
+            </svg>
           </button>
         </div>
         
-        <!-- Center Focus Indicator -->
-        <div class="focus-indicator"></div>
+        <!-- Grid Lines -->
+        <div v-if="showGrid" class="grid-lines">
+          <div class="grid-line grid-vertical-1"></div>
+          <div class="grid-line grid-vertical-2"></div>
+          <div class="grid-line grid-horizontal-1"></div>
+          <div class="grid-line grid-horizontal-2"></div>
+        </div>
       </div>
     </div>
     
     <!-- Bottom Controls -->
     <div class="camera-controls">
-      <!-- Mode Toggle -->
-      <div class="mode-toggle">
-        <button 
-          class="mode-btn" 
-          :class="{ active: mode === 'photo' }"
-          @click="setMode('photo')"
-          :disabled="isRecording"
-        >
-          Photo
-        </button>
-        <button 
-          class="mode-btn" 
-          :class="{ active: mode === 'video' }"
-          @click="setMode('video')"
-          :disabled="isRecording"
-        >
-          Video
-        </button>
+      <!-- Mode Selector -->
+      <div class="mode-selector" role="tablist" aria-label="Camera modes">
+        <div class="mode-options">
+          <button 
+            class="mode-option" 
+            :class="{ active: mode === 'video' }"
+            @click="setMode('video')"
+            :disabled="isRecording"
+            role="tab"
+            :aria-selected="mode === 'video'"
+            aria-label="Video recording mode"
+          >
+            VIDEO
+          </button>
+          <button 
+            class="mode-option" 
+            :class="{ active: mode === 'photo' }"
+            @click="setMode('photo')"
+            :disabled="isRecording"
+            role="tab"
+            :aria-selected="mode === 'photo'"
+            aria-label="Photo capture mode"
+          >
+            PHOTO
+          </button>
+          <button 
+            class="mode-option" 
+            :class="{ active: mode === 'landscape' }"
+            @click="setMode('landscape')"
+            :disabled="isRecording"
+            role="tab"
+            :aria-selected="mode === 'landscape'"
+            aria-label="Landscape photo mode"
+          >
+            LANDSCAPE
+          </button>
+        </div>
       </div>
       
-      <!-- Capture Button -->
-      <div class="capture-container">
+      <!-- Main Controls -->
+      <div class="main-controls">
+        <!-- Gallery Preview -->
         <button 
-          class="capture-btn" 
-          :class="{ 'recording': isRecording, 'video-mode': mode === 'video' }"
-          @click="handleCapture"
-          :disabled="isCapturing"
+          class="gallery-preview" 
+          @click="openGallery"
+          aria-label="Open gallery to view photos and videos"
         >
-          <span class="capture-inner"></span>
+          <img v-if="lastPhoto" :src="lastPhoto.thumbnail_url || lastPhoto.file_url" alt="Last captured photo" />
+          <div v-else class="gallery-placeholder">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
         </button>
-      </div>
-      
-      <!-- Gallery Preview -->
-      <div class="gallery-preview" @click="openGallery">
-        <img v-if="lastPhoto" :src="lastPhoto.thumbnail_url || lastPhoto.file_url" alt="Last photo" />
-        <div v-else class="gallery-placeholder">
-          <i class="icon-gallery"></i>
+        
+        <!-- Capture Button -->
+        <div class="capture-container">
+          <button 
+            class="capture-btn" 
+            :class="{ 'recording': isRecording, 'video-mode': mode === 'video' }"
+            @click="handleCapture"
+            :disabled="isCapturing"
+            :aria-label="getCaptureButtonLabel()"
+            :aria-pressed="isRecording"
+          >
+            <span class="capture-inner" aria-hidden="true"></span>
+          </button>
+        </div>
+        
+        <!-- Flip Camera Button -->
+        <div class="flip-camera-container">
+          <button 
+            class="flip-camera-btn" 
+            @click="flipCamera" 
+            v-if="config.enableCameraFlip"
+            aria-label="Switch between front and back camera"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="11" r="3" stroke="currentColor" stroke-width="2"/>
+              <path d="m8 2 4-2 4 2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -87,9 +176,10 @@ export default {
   
   data() {
     return {
-      mode: 'photo', // 'photo' or 'video'
+      mode: 'photo', // 'photo', 'video', or 'landscape'
       currentFilter: 'none',
       flashEnabled: false,
+      showGrid: false,
       isCapturing: false,
       isRecording: false,
       recordingDuration: 0,
@@ -157,6 +247,10 @@ export default {
     
     toggleFlash() {
       this.flashEnabled = !this.flashEnabled;
+    },
+
+    toggleGrid() {
+      this.showGrid = !this.showGrid;
     },
     
     cycleFilter() {
@@ -279,6 +373,14 @@ export default {
         message,
         type
       });
+    },
+    
+    getCaptureButtonLabel() {
+      if (this.mode === 'photo') {
+        return this.isCapturing ? 'Capturing photo...' : 'Capture photo';
+      } else {
+        return this.isRecording ? 'Stop recording video' : 'Start recording video';
+      }
     }
   }
 };
@@ -287,23 +389,54 @@ export default {
 <style scoped>
 .camera-app {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #000;
   position: relative;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Status Bar */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 20;
+}
+
+.status-icons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.signal-icon,
+.battery-icon {
+  font-size: 12px;
+}
+
+/* Camera Viewfinder */
 .camera-viewfinder {
   flex: 1;
   position: relative;
-  background: #1a1a1a;
+  background: #ff0000; /* Red background like iOS camera */
   overflow: hidden;
 }
 
 .camera-viewfinder.recording {
-  border: 2px solid #ff0000;
+  animation: recordingPulse 2s ease-in-out infinite;
+}
+
+@keyframes recordingPulse {
+  0%, 100% { background: #ff0000; }
+  50% { background: #cc0000; }
 }
 
 .viewfinder-overlay {
@@ -341,6 +474,7 @@ export default {
   filter: hue-rotate(20deg) saturate(120%);
 }
 
+/* Recording Indicator */
 .recording-indicator {
   position: absolute;
   top: 20px;
@@ -348,63 +482,61 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   padding: 8px 12px;
   border-radius: 20px;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  z-index: 10;
+  z-index: 15;
 }
 
 .recording-dot {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   background: #ff0000;
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .recording-time {
-  font-family: monospace;
+  font-family: -apple-system-monospaced, monospace;
+  font-size: 13px;
 }
 
+/* Top Controls */
 .camera-top-controls {
   position: absolute;
   top: 20px;
   right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  z-index: 10;
+  gap: 16px;
+  z-index: 15;
 }
 
 .control-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.5);
   border: none;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
 }
 
 .control-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7);
   transform: scale(1.05);
 }
 
@@ -412,136 +544,123 @@ export default {
   transform: scale(0.95);
 }
 
-.filter-name {
+.flash-btn.active,
+.grid-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+/* Grid Lines */
+.grid-lines {
   position: absolute;
-  top: 50%;
-  right: calc(100% + 8px);
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  transition: opacity 0.2s;
+  z-index: 5;
 }
 
-.control-btn:hover .filter-name {
-  opacity: 1;
-}
-
-.focus-indicator {
+.grid-line {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  border-radius: 4px;
-  pointer-events: none;
+  background: rgba(255, 255, 255, 0.3);
 }
 
+.grid-vertical-1,
+.grid-vertical-2 {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.grid-vertical-1 { left: 33.33%; }
+.grid-vertical-2 { left: 66.66%; }
+
+.grid-horizontal-1,
+.grid-horizontal-2 {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+.grid-horizontal-1 { top: 33.33%; }
+.grid-horizontal-2 { top: 66.66%; }
+
+/* Bottom Controls */
 .camera-controls {
-  height: 140px;
-  background: rgba(0, 0, 0, 0.9);
+  background: #000;
+  padding: 20px 0 40px;
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Mode Selector */
+.mode-selector {
+  display: flex;
+  justify-content: center;
+}
+
+.mode-options {
+  display: flex;
+  gap: 40px;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+}
+
+.mode-option {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   position: relative;
 }
 
-.mode-toggle {
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-}
-
-.mode-btn {
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
-}
-
-.mode-btn.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #fff;
+.mode-option.active {
   color: #fff;
+  font-weight: 600;
 }
 
-.mode-btn:disabled {
+.mode-option.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 2px;
+  background: #ffcc00;
+  border-radius: 1px;
+}
+
+.mode-option:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.capture-container {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.capture-btn {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: transparent;
-  border: 4px solid #fff;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Main Controls */
+.main-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0;
+  justify-content: space-between;
+  padding: 0 30px;
 }
 
-.capture-btn:hover {
-  transform: scale(1.05);
-}
-
-.capture-btn:active {
-  transform: scale(0.95);
-}
-
-.capture-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.capture-inner {
-  width: 58px;
-  height: 58px;
-  background: #fff;
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.capture-btn.video-mode .capture-inner {
-  background: #ff0000;
-}
-
-.capture-btn.recording .capture-inner {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-}
-
+/* Gallery Preview */
 .gallery-preview {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .gallery-preview:hover {
@@ -561,15 +680,384 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 20px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* Icon placeholders - replace with actual icon library */
-.icon-flash-on::before { content: '⚡'; }
-.icon-flash-off::before { content: '⚡'; opacity: 0.5; }
-.icon-filter::before { content: '🎨'; }
-.icon-flip::before { content: '🔄'; }
-.icon-gallery::before { content: '🖼️'; }
+/* Capture Button */
+.capture-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.capture-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: transparent;
+  border: 6px solid #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+}
+
+.capture-btn:hover {
+  transform: scale(1.05);
+}
+
+.capture-btn:active {
+  transform: scale(0.95);
+}
+
+.capture-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.capture-inner {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.capture-btn.video-mode .capture-inner {
+  background: #ff0000;
+  border-radius: 50%;
+}
+
+.capture-btn.recording .capture-inner {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Flip Camera Button */
+.flip-camera-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flip-camera-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.flip-camera-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.flip-camera-btn:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+/* Large phones and small tablets */
+@media (max-width: 480px) {
+  .status-bar {
+    padding: 6px 18px;
+    font-size: 13px;
+  }
+  
+  .top-controls {
+    padding: 16px 24px;
+    gap: 20px;
+  }
+  
+  .control-btn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .control-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .camera-controls {
+    padding: 18px 0 36px;
+    gap: 18px;
+  }
+  
+  .mode-options {
+    gap: 36px;
+  }
+  
+  .mode-option {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+  
+  .main-controls {
+    padding: 0 24px;
+  }
+  
+  .gallery-preview {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .capture-btn {
+    width: 76px;
+    height: 76px;
+    border-width: 5px;
+  }
+  
+  .capture-inner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .capture-btn.recording .capture-inner {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .flip-camera-btn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .flip-camera-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 375px) {
+  .main-controls {
+    padding: 0 20px;
+  }
+  
+  .mode-options {
+    gap: 30px;
+  }
+  
+  .capture-btn {
+    width: 70px;
+    height: 70px;
+    border-width: 5px;
+  }
+  
+  .capture-inner {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .capture-btn.recording .capture-inner {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .gallery-preview {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .flip-camera-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .flip-camera-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .recording-indicator {
+    top: 16px;
+    left: 16px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .recording-dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 320px) {
+  .status-bar {
+    padding: 4px 16px;
+    font-size: 12px;
+  }
+  
+  .top-controls {
+    padding: 12px 20px;
+    gap: 16px;
+  }
+  
+  .control-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .control-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .camera-controls {
+    padding: 16px 0 32px;
+    gap: 16px;
+  }
+  
+  .mode-options {
+    gap: 24px;
+  }
+  
+  .mode-option {
+    font-size: 11px;
+    padding: 4px 0;
+  }
+  
+  .main-controls {
+    padding: 0 16px;
+  }
+  
+  .gallery-preview {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .capture-btn {
+    width: 64px;
+    height: 64px;
+    border-width: 4px;
+  }
+  
+  .capture-inner {
+    width: 52px;
+    height: 52px;
+  }
+  
+  .capture-btn.recording .capture-inner {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .flip-camera-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .flip-camera-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .recording-indicator {
+    top: 12px;
+    left: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .recording-dot {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+/* Accessibility - Focus States */
+.control-btn:focus,
+.mode-option:focus,
+.capture-btn:focus,
+.flip-camera-btn:focus,
+.gallery-preview:focus {
+  outline: 2px solid #ffcc00;
+  outline-offset: 2px;
+}
+
+.control-btn:focus-visible,
+.mode-option:focus-visible,
+.capture-btn:focus-visible,
+.flip-camera-btn:focus-visible,
+.gallery-preview:focus-visible {
+  outline: 2px solid #ffcc00;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .control-btn {
+    border-color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .control-btn.active {
+    background: #fff;
+    color: #000;
+  }
+  
+  .mode-option {
+    color: #fff;
+  }
+  
+  .mode-option.active {
+    background: #fff;
+    color: #000;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
+  
+  .capture-btn {
+    border-color: #fff;
+  }
+  
+  .flip-camera-btn {
+    border-color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .gallery-preview {
+    border-color: #fff;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Touch feedback for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .control-btn:hover,
+  .capture-btn:hover,
+  .flip-camera-btn:hover,
+  .gallery-preview:hover {
+    transform: none;
+  }
+  
+  .control-btn:active,
+  .capture-btn:active,
+  .flip-camera-btn:active {
+    transform: scale(0.95);
+  }
+}
 </style>

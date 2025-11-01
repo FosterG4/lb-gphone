@@ -25,6 +25,8 @@ RegisterNetEvent('phone:server:getModishFeed', function(data)
     local offset = data.offset or 0
     
     -- Get feed (all videos, ordered by newest first)
+    -- Note: file_url supports both local (nui://) and Fivemanage (https://) URLs
+    -- The URL format is determined by Config.MediaStorage when media is uploaded
     local feed = MySQL.query.await([[
         SELECT 
             v.id,
@@ -63,7 +65,7 @@ RegisterNetEvent('phone:server:getModishFeed', function(data)
         likedSet[like.video_id] = true
     end
     
-    -- Mark videos with user interaction status
+    -- Mark videos with user interaction status and fetch additional media
     for _, video in ipairs(feed or {}) do
         video.isLiked = likedSet[video.id] or false
         video.media_type = 'video'
@@ -71,6 +73,48 @@ RegisterNetEvent('phone:server:getModishFeed', function(data)
         -- Parse filters JSON if exists
         if video.filters_json then
             video.filters = json.decode(video.filters_json)
+        end
+        
+        -- Fetch additional media attachments
+        local additionalMedia = MySQL.query.await([[
+            SELECT 
+                m.id,
+                m.file_url,
+                m.thumbnail_url,
+                m.media_type,
+                m.duration,
+                vm.display_order
+            FROM phone_modish_video_media vm
+            INNER JOIN phone_media m ON vm.media_id = m.id
+            WHERE vm.video_id = ?
+            ORDER BY vm.display_order ASC
+        ]], {
+            video.id
+        })
+        
+        if additionalMedia and #additionalMedia > 0 then
+            -- Create media array with all attachments
+            video.media = {}
+            -- Add primary media first
+            table.insert(video.media, {
+                id = video.id,
+                url = video.media_url,
+                thumbnail_url = video.thumbnail_url,
+                media_type = video.media_type,
+                duration = video.duration,
+                display_order = 0
+            })
+            -- Add additional media
+            for _, media in ipairs(additionalMedia) do
+                table.insert(video.media, {
+                    id = media.id,
+                    url = media.file_url,
+                    thumbnail_url = media.thumbnail_url,
+                    media_type = media.media_type,
+                    duration = media.duration,
+                    display_order = media.display_order
+                })
+            end
         end
     end
     
@@ -93,6 +137,7 @@ RegisterNetEvent('phone:server:getMyModishVideos', function()
         return
     end
     
+    -- Get user's own videos with media URLs (supports both local and Fivemanage URLs)
     local myVideos = MySQL.query.await([[
         SELECT 
             v.id,
@@ -115,12 +160,54 @@ RegisterNetEvent('phone:server:getMyModishVideos', function()
         phoneNumber
     })
     
-    -- Parse filters JSON for each video
+    -- Parse filters JSON and fetch additional media for each video
     for _, video in ipairs(myVideos or {}) do
         if video.filters_json then
             video.filters = json.decode(video.filters_json)
         end
         video.media_type = 'video'
+        
+        -- Fetch additional media attachments
+        local additionalMedia = MySQL.query.await([[
+            SELECT 
+                m.id,
+                m.file_url,
+                m.thumbnail_url,
+                m.media_type,
+                m.duration,
+                vm.display_order
+            FROM phone_modish_video_media vm
+            INNER JOIN phone_media m ON vm.media_id = m.id
+            WHERE vm.video_id = ?
+            ORDER BY vm.display_order ASC
+        ]], {
+            video.id
+        })
+        
+        if additionalMedia and #additionalMedia > 0 then
+            -- Create media array with all attachments
+            video.media = {}
+            -- Add primary media first
+            table.insert(video.media, {
+                id = video.id,
+                url = video.media_url,
+                thumbnail_url = video.thumbnail_url,
+                media_type = video.media_type,
+                duration = video.duration,
+                display_order = 0
+            })
+            -- Add additional media
+            for _, media in ipairs(additionalMedia) do
+                table.insert(video.media, {
+                    id = media.id,
+                    url = media.file_url,
+                    thumbnail_url = media.thumbnail_url,
+                    media_type = media.media_type,
+                    duration = media.duration,
+                    display_order = media.display_order
+                })
+            end
+        end
     end
     
     TriggerClientEvent('phone:client:receiveMyModishVideos', source, {
@@ -137,20 +224,51 @@ RegisterNetEvent('phone:server:createModishVideo', function(data)
         return
     end
     
-    local mediaId = tonumber(data.mediaId)
+    -- Support both single mediaId (backward compatibility) and mediaIds array (new feature)
+    local mediaIds = {}
+    if data.mediaIds and type(data.mediaIds) == 'table' and #data.mediaIds > 0 then
+        -- New format: array of media IDs
+        for _, id in ipairs(data.mediaIds) do
+            local numId = tonumber(id)
+            if numId then
+                table.insert(mediaIds, numId)
+            end
+        end
+    elseif data.mediaId then
+        -- Old format: single media ID (backward compatibility)
+        local numId = tonumber(data.mediaId)
+        if numId then
+            table.insert(mediaIds, numId)
+        end
+    end
+    
     local caption = data.caption or ''
     local filters = data.filters
     local tts = data.tts
     local music = data.music
     
     -- Validation
-    if not mediaId then
+    if #mediaIds == 0 then
         TriggerClientEvent('phone:client:createModishVideoResult', source, {
             success = false,
-            message = 'Invalid media ID'
+            message = 'Invalid media ID(s)'
         })
         return
     end
+    
+    -- Limit number of media attachments per video
+    local maxMediaPerVideo = Config.Modish and Config.Modish.maxMediaPerVideo or 10
+    if #mediaIds > maxMediaPerVideo then
+        TriggerClientEvent('phone:client:createModishVideoResult', source, {
+            success = false,
+            message = string.format('Maximum %d media items per video', maxMediaPerVideo)
+        })
+        return
+    end
+    
+    -- Note: Video upload (including Fivemanage) is handled by Storage.HandleUpload()
+    -- before this function is called. The mediaIds reference phone_media table which
+    -- already contains the Fivemanage URL if Config.MediaStorage = 'fivemanage'
     
     -- Trim caption
     caption = caption:gsub("^%s*(.-)%s*$", "%1")
@@ -185,27 +303,45 @@ RegisterNetEvent('phone:server:createModishVideo', function(data)
         return
     end
     
-    -- Verify media ownership and that it's a video
-    local media = MySQL.query.await([[
+    -- Verify media ownership for all media IDs and ensure they're videos
+    -- Video can be stored locally or on Fivemanage - both are supported
+    local mediaPlaceholders = table.concat(string.rep('?,', #mediaIds):sub(1, -2):split(','), ',')
+    local queryParams = {}
+    for _, id in ipairs(mediaIds) do
+        table.insert(queryParams, id)
+    end
+    table.insert(queryParams, phoneNumber)
+    
+    local media = MySQL.query.await(string.format([[
         SELECT id, media_type, file_url, thumbnail_url, duration
         FROM phone_media
-        WHERE id = ? AND owner_number = ? AND media_type = 'video'
-    ]], {
-        mediaId,
-        phoneNumber
-    })
+        WHERE id IN (%s) AND owner_number = ? AND media_type = 'video'
+    ]], mediaPlaceholders), queryParams)
     
-    if not media or #media == 0 then
+    if not media or #media ~= #mediaIds then
         TriggerClientEvent('phone:client:createModishVideoResult', source, {
             success = false,
-            message = 'Video not found or you do not own this video'
+            message = 'One or more videos not found or you do not own them'
         })
         return
     end
     
-    -- Validate video length
-    local maxVideoLength = Config.Modish.maxVideoLength or 60
-    if media[1].duration and media[1].duration > maxVideoLength then
+    -- Use the first media item as the primary media for the video (for backward compatibility)
+    local primaryMediaId = mediaIds[1]
+    
+    -- Log media source for debugging (if enabled)
+    if Config.DebugMode then
+        for _, mediaItem in ipairs(media) do
+            local storageType = mediaItem.file_url:match('^https://') and 'Fivemanage/CDN' or 'Local'
+            print(string.format('[Phone] [Modish] Creating video with %s media - ID: %d, URL: %s', 
+                storageType, mediaItem.id, mediaItem.file_url))
+        end
+    end
+    
+    -- Validate video length for primary video
+    local maxVideoLength = Config.Modish and Config.Modish.maxVideoLength or 60
+    local primaryMedia = media[1]
+    if primaryMedia.duration and primaryMedia.duration > maxVideoLength then
         TriggerClientEvent('phone:client:createModishVideoResult', source, {
             success = false,
             message = string.format('Video is too long (max %d seconds)', maxVideoLength)
@@ -228,14 +364,14 @@ RegisterNetEvent('phone:server:createModishVideo', function(data)
         musicTrack = music
     end
     
-    -- Insert video into database
+    -- Insert video into database with primary media
     local insertId = MySQL.insert.await([[
         INSERT INTO phone_modish_videos (author_number, author_name, media_id, caption, music_track, filters_json, likes, views)
         VALUES (?, ?, ?, ?, ?, ?, 0, 0)
     ]], {
         phoneNumber,
         authorName,
-        mediaId,
+        primaryMediaId,
         caption,
         musicTrack,
         filtersJson
@@ -247,6 +383,24 @@ RegisterNetEvent('phone:server:createModishVideo', function(data)
             message = 'Failed to create video'
         })
         return
+    end
+    
+    -- Insert additional media attachments into junction table (if multiple media)
+    if #mediaIds > 1 then
+        for i, mediaId in ipairs(mediaIds) do
+            MySQL.insert.await([[
+                INSERT INTO phone_modish_video_media (video_id, media_id, display_order)
+                VALUES (?, ?, ?)
+            ]], {
+                insertId,
+                mediaId,
+                i - 1  -- 0-indexed display order
+            })
+        end
+        
+        if Config.DebugMode then
+            print(string.format('[Phone] [Modish] Added %d media attachments to video ID: %d', #mediaIds, insertId))
+        end
     end
     
     -- Update cooldown
@@ -280,6 +434,50 @@ RegisterNetEvent('phone:server:createModishVideo', function(data)
         
         if video[1].filters_json then
             video[1].filters = json.decode(video[1].filters_json)
+        end
+        
+        -- Fetch additional media attachments if multiple media
+        if #mediaIds > 1 then
+            local additionalMedia = MySQL.query.await([[
+                SELECT 
+                    m.id,
+                    m.file_url,
+                    m.thumbnail_url,
+                    m.media_type,
+                    m.duration,
+                    vm.display_order
+                FROM phone_modish_video_media vm
+                INNER JOIN phone_media m ON vm.media_id = m.id
+                WHERE vm.video_id = ?
+                ORDER BY vm.display_order ASC
+            ]], {
+                insertId
+            })
+            
+            if additionalMedia and #additionalMedia > 0 then
+                -- Create media array with all attachments
+                video[1].media = {}
+                -- Add primary media first
+                table.insert(video[1].media, {
+                    id = video[1].id,
+                    url = video[1].media_url,
+                    thumbnail_url = video[1].thumbnail_url,
+                    media_type = video[1].media_type,
+                    duration = video[1].duration,
+                    display_order = 0
+                })
+                -- Add additional media
+                for _, media in ipairs(additionalMedia) do
+                    table.insert(video[1].media, {
+                        id = media.id,
+                        url = media.file_url,
+                        thumbnail_url = media.thumbnail_url,
+                        media_type = media.media_type,
+                        duration = media.duration,
+                        display_order = media.display_order
+                    })
+                end
+            end
         end
         
         -- Send success response to poster

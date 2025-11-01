@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Formatting Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        h1 {
+            color: #1d1d1f;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #007AFF;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .test-case {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .test-case:last-child {
+            border-bottom: none;
+        }
+        .test-label {
+            color: #8e8e93;
+            font-weight: 500;
+        }
+        .test-value {
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+        .test-value.success {
+            color: #34C759;
+        }
+        .test-value.error {
+            color: #FF3B30;
+        }
+        .locale-selector {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Currency Formatting Test</h1>
+    
+    <div class="locale-selector">
+        <label for="locale">Select Locale: </label>
+        <select id="locale" onchange="updateTests()">
+            <option value="en">English (USD)</option>
+            <option value="ja">Japanese (JPY)</option>
+            <option value="es">Spanish (EUR)</option>
+            <option value="fr">French (EUR)</option>
+            <option value="de">German (EUR)</option>
+            <option value="pt">Portuguese (BRL)</option>
+        </select>
+    </div>
+
+    <div class="test-section">
+        <h2>Basic Currency Formatting</h2>
+        <div id="basic-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Large Number Formatting</h2>
+        <div id="large-number-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Currency Validation (999 Trillion Limit)</h2>
+        <div id="validation-tests"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Wallet Component Tests</h2>
+        <div id="wallet-tests"></div>
+    </div>
+
+    <script type="module">
+        // Simulate the currency utility functions
+        const MAX_CURRENCY_VALUE = 999000000000000;
+
+        let currentLocale = 'en';
+
+        function getCurrentLocale() {
+            return currentLocale;
+        }
+
+        function formatCurrency(amount, locale = null) {
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                return '0';
+            }
+
+            if (amount > MAX_CURRENCY_VALUE) {
+                amount = MAX_CURRENCY_VALUE;
+            }
+
+            const currentLocale = locale || getCurrentLocale();
+            
+            const currencyConfigs = {
+                'en': { symbol: '$', position: 'before', locale: 'en-US', currency: 'USD' },
+                'ja': { symbol: '¥', position: 'before', locale: 'ja-JP', currency: 'JPY' },
+                'es': { symbol: '€', position: 'after', locale: 'es-ES', currency: 'EUR' },
+                'fr': { symbol: '€', position: 'after', locale: 'fr-FR', currency: 'EUR' },
+                'de': { symbol: '€', position: 'after', locale: 'de-DE', currency: 'EUR' },
+                'pt': { symbol: 'R$', position: 'before', locale: 'pt-BR', currency: 'BRL' }
+            };
+
+            const config = currencyConfigs[currentLocale] || currencyConfigs['en'];
+
+            try {
+                const formatter = new Intl.NumberFormat(config.locale, {
+                    style: 'currency',
+                    currency: config.currency,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                return formatter.format(amount);
+            } catch (error) {
+                console.warn('Currency formatting error:', error);
+                
+                const formattedAmount = amount.toLocaleString(config.locale, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                if (config.position === 'before') {
+                    return `${config.symbol}${formattedAmount}`;
+                } else {
+                    return `${formattedAmount} ${config.symbol}`;
+                }
+            }
+        }
+
+        function validateCurrency(amount, options = {}) {
+            const { allowZero = false, minAmount = 0 } = options;
+            
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                return {
+                    isValid: false,
+                    error: 'Invalid amount format',
+                    errorKey: 'invalidFormat'
+                };
+            }
+
+            if (amount < 0) {
+                return {
+                    isValid: false,
+                    error: 'Amount cannot be negative',
+                    errorKey: 'negativeAmount'
+                };
+            }
+
+            if (!allowZero && amount === 0) {
+                return {
+                    isValid: false,
+                    error: 'Amount must be greater than zero',
+                    errorKey: 'belowMinimum'
+                };
+            }
+
+            if (amount < minAmount) {
+                return {
+                    isValid: false,
+                    error: `Amount must be at least ${formatCurrency(minAmount)}`,
+                    errorKey: 'belowMinimum'
+                };
+            }
+
+            if (amount > MAX_CURRENCY_VALUE) {
+                return {
+                    isValid: false,
+                    error: `Amount cannot exceed ${formatCurrency(MAX_CURRENCY_VALUE)}`,
+                    errorKey: 'exceedsMaximum'
+                };
+            }
+
+            return {
+                isValid: true,
+                error: null,
+                errorKey: null
+            };
+        }
+
+        function runTests() {
+            // Basic tests
+            const basicTests = [
+                { label: 'Small amount (10.50)', value: 10.50 },
+                { label: 'Medium amount (1,234.56)', value: 1234.56 },
+                { label: 'Large amount (1,000,000)', value: 1000000 },
+                { label: 'Zero', value: 0 },
+                { label: 'Negative (-500)', value: -500 }
+            ];
+
+            const basicTestsHtml = basicTests.map(test => `
+                <div class="test-case">
+                    <span class="test-label">${test.label}</span>
+                    <span class="test-value">${formatCurrency(test.value)}</span>
+                </div>
+            `).join('');
+            document.getElementById('basic-tests').innerHTML = basicTestsHtml;
+
+            // Large number tests
+            const largeNumberTests = [
+                { label: '1 Million', value: 1000000 },
+                { label: '1 Billion', value: 1000000000 },
+                { label: '1 Trillion', value: 1000000000000 },
+                { label: '999 Trillion (Max)', value: 999000000000000 },
+                { label: '1000 Trillion (Over Max)', value: 1000000000000000 }
+            ];
+
+            const largeNumberTestsHtml = largeNumberTests.map(test => `
+                <div class="test-case">
+                    <span class="test-label">${test.label}</span>
+                    <span class="test-value">${formatCurrency(test.value)}</span>
+                </div>
+            `).join('');
+            document.getElementById('large-number-tests').innerHTML = largeNumberTestsHtml;
+
+            // Validation tests
+            const validationTests = [
+                { label: 'Valid: 1,000', value: 1000 },
+                { label: 'Valid: 999 Trillion', value: 999000000000000 },
+                { label: 'Invalid: 1000 Trillion', value: 1000000000000000 },
+                { label: 'Invalid: Negative', value: -100 },
+                { label: 'Invalid: Zero (no allowZero)', value: 0 }
+            ];
+
+            const validationTestsHtml = validationTests.map(test => {
+                const result = validateCurrency(test.value);
+                const className = result.isValid ? 'success' : 'error';
+                const status = result.isValid ? '✓ Valid' : `✗ ${result.error}`;
+                return `
+                    <div class="test-case">
+                        <span class="test-label">${test.label}</span>
+                        <span class="test-value ${className}">${status}</span>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('validation-tests').innerHTML = validationTestsHtml;
+
+            // Wallet component tests
+            const walletTests = [
+                { label: 'Balance Display', value: 12345.67 },
+                { label: 'Transaction Amount', value: 250.00 },
+                { label: 'Transfer Amount', value: 1500.50 },
+                { label: 'Monthly Income', value: 5000.00 },
+                { label: 'Monthly Expenses', value: 3200.75 }
+            ];
+
+            const walletTestsHtml = walletTests.map(test => `
+                <div class="test-case">
+                    <span class="test-label">${test.label}</span>
+                    <span class="test-value success">${formatCurrency(test.value)}</span>
+                </div>
+            `).join('');
+            document.getElementById('wallet-tests').innerHTML = walletTestsHtml;
+        }
+
+        function updateTests() {
+            currentLocale = document.getElementById('locale').value;
+            runTests();
+        }
+
+        // Make functions global for the select onchange
+        window.updateTests = updateTests;
+
+        // Run tests on load
+        runTests();
+    </script>
+</body>
+</html>

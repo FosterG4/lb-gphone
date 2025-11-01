@@ -47,8 +47,7 @@ Config.EnabledApps = {
     pages = true,
     
     -- Finance
-    bank = true,
-    bankr = true,
+    wallet = true, -- Unified banking solution (replaces bank and bankr)
     crypto = true,
     cryptox = true,
     
@@ -57,7 +56,10 @@ Config.EnabledApps = {
     
     -- Safety
     finder = true,
-    safezone = true
+    safezone = true,
+    
+    -- Productivity
+    voicerecorder = true
 }
 
 -- Notification Settings
@@ -84,13 +86,28 @@ Config.DatabaseResource = 'oxmysql' -- Database resource name
 Config.DatabaseCacheTime = 300000 -- Cache time in milliseconds (5 minutes)
 Config.CreateTablesOnStart = true -- Auto-create database tables on resource start
 
--- Bank App Settings
-Config.BankApp = {
+-- Wallet App Settings (Unified Banking Solution)
+-- Consolidates functionality from Bank and Bankr apps
+Config.WalletApp = {
     enabled = true,
     defaultAccount = 'bank', -- Account type for framework integration
-    transactionHistoryLimit = 50, -- Number of transactions to display
+    transactionHistoryLimit = 100, -- Number of transactions to display
     minTransferAmount = 1,
-    maxTransferAmount = 999999
+    maxTransferAmount = 999000000000000, -- 999 trillion (matches Config.Currency.maxValue)
+    -- Banking integration
+    bankingScript = 'qb-banking', -- 'qb-banking', 'okokBanking', 'Renewed-Banking', 'custom'
+    -- Analytics and insights
+    showAnalytics = true,
+    enableRecurringPayments = true,
+    enableBudgetTracking = true,
+    enableSpendingCategories = true,
+    analyticsUpdateInterval = 60000, -- 1 minute
+    -- Cards management
+    enableCardsManagement = true,
+    maxCardsPerPlayer = 5,
+    -- Customization
+    enableCustomization = true,
+    availableThemes = {'default', 'minimal', 'premium'}
 }
 
 -- Chirper App Settings
@@ -179,13 +196,62 @@ Config.SettingsApp = {
 }
 
 -- Media Storage Settings
-Config.MediaStorage = 'local' -- 'local' or 'cdn'
+-- Options: 'local', 'cdn', 'fivemanage'
+-- 'local' - Store media files locally in the resource directory
+-- 'cdn' - Use custom CDN provider (S3, R2, etc.)
+-- 'fivemanage' - Use Fivemanage CDN service for FiveM servers
+Config.MediaStorage = 'local'
+
+-- CDN Configuration (for custom CDN providers)
 Config.CDNConfig = {
     provider = 's3', -- 's3', 'r2', 'custom'
     endpoint = '',
     bucket = '',
     accessKey = '',
     secretKey = ''
+}
+
+-- Fivemanage Configuration
+-- Fivemanage is a CDN and media hosting service specifically designed for FiveM servers
+-- Get your API key from: https://fivemanage.com
+Config.FivemanageConfig = {
+    -- Enable or disable Fivemanage integration
+    enabled = true,
+    
+    -- Your Fivemanage API key (required)
+    -- Obtain from https://fivemanage.com/dashboard
+    apiKey = '',
+    
+    -- Fivemanage API endpoint for uploads
+    -- Default: https://api.fivemanage.com/api/image
+    -- Do not change unless instructed by Fivemanage support
+    endpoint = 'https://api.fivemanage.com/api/image',
+    
+    -- Request timeout in milliseconds
+    -- How long to wait for Fivemanage to respond before timing out
+    -- Default: 30000 (30 seconds)
+    timeout = 30000,
+    
+    -- Number of retry attempts on upload failure
+    -- If an upload fails due to network issues, retry this many times
+    -- Default: 3
+    retryAttempts = 3,
+    
+    -- Delay between retry attempts in milliseconds
+    -- Uses exponential backoff (delay doubles with each retry)
+    -- Default: 1000 (1 second initial delay)
+    retryDelay = 1000,
+    
+    -- Fall back to local storage if Fivemanage upload fails
+    -- If true, media will be saved locally when Fivemanage is unavailable
+    -- If false, upload will fail and player will receive an error
+    -- Default: true (recommended)
+    fallbackToLocal = true,
+    
+    -- Log all upload attempts and results to server console
+    -- Useful for debugging and monitoring upload success rates
+    -- Default: true
+    logUploads = true
 }
 Config.MaxPhotoSize = 5 * 1024 * 1024 -- 5MB in bytes
 Config.MaxVideoSize = 50 * 1024 * 1024 -- 50MB in bytes
@@ -198,6 +264,20 @@ Config.ThumbnailSize = 200 -- pixels
 Config.ImageQuality = 80 -- JPEG quality (0-100)
 Config.VideoFPS = 24
 Config.OptimizeImages = true
+
+-- Performance Optimization Settings
+Config.MaxConcurrentUploads = 3 -- Maximum concurrent uploads per player
+Config.UrlCacheTime = 300 -- Cache Fivemanage URLs for 5 minutes (in seconds)
+Config.EnableAsyncUploads = true -- Process uploads asynchronously in background
+Config.ShowUploadProgress = true -- Show upload progress indicators to players
+
+-- Upload Rate Limiting Settings
+Config.UploadLimits = {
+    maxUploadsPerMinute = 10, -- Maximum uploads per player per minute
+    cooldownSeconds = 2, -- Cooldown between individual uploads (seconds)
+    maxFailedAttemptsBeforeBlock = 15, -- Failed attempts before temporary block
+    blockDurationMinutes = 5 -- Duration of temporary block (minutes)
+}
 
 -- Camera App Settings
 Config.CameraApp = {
@@ -372,17 +452,7 @@ Config.PagesApp = {
     enableLocationDisplay = true
 }
 
--- Bankr App Settings (Enhanced Banking)
-Config.BankrApp = {
-    enabled = true,
-    bankingScript = 'qb-banking', -- 'qb-banking', 'okokBanking', 'Renewed-Banking', 'custom'
-    showAnalytics = true,
-    enableRecurringPayments = true,
-    transactionHistoryLimit = 100,
-    enableBudgetTracking = true,
-    enableSpendingCategories = true,
-    analyticsUpdateInterval = 60000 -- 1 minute
-}
+
 
 -- CryptoX App Settings (Enhanced Crypto Trading)
 Config.CryptoXApp = {
@@ -494,4 +564,143 @@ Config.Security = {
     sanitizeUserContent = true,
     maxLoginAttempts = 5,
     loginCooldown = 300000 -- 5 minutes
+}
+
+-- Locale Configuration
+-- Default language for the phone system
+-- Options: 'en' (English), 'ja' (Japanese), 'es' (Spanish), 'fr' (French), 'de' (German), 'pt' (Portuguese)
+Config.Locale = 'en'
+
+-- Supported Locales
+-- Array of all supported languages in the system
+-- Add or remove locales as needed for your server
+Config.SupportedLocales = {'en', 'ja', 'es', 'fr', 'de', 'pt'}
+
+-- Currency System Settings
+-- Configure currency display, formatting, and validation
+-- Maximum supported value: 999,000,000,000,000 (999 trillion)
+--
+-- Configuration Options:
+--   enabled: Enable/disable currency formatting system
+--   maxValue: Maximum currency value supported (999 trillion)
+--   localeSettings: Per-locale currency configuration
+--     symbol: Currency symbol to display (e.g., '$', '€', '¥', 'R$')
+--     position: Symbol position - 'before' or 'after' the amount
+--     decimalPlaces: Number of decimal places to display (0-8)
+--     thousandsSeparator: Character for thousands separator (',', '.', ' ')
+--     decimalSeparator: Character for decimal separator ('.', ',')
+--     format: String format pattern (%s = symbol, %s = amount)
+--   enableValidation: Validate currency amounts against maxValue
+--   enableFormatting: Apply locale-specific formatting to currency displays
+--   enableAbbreviation: Show abbreviated values (1M, 1B, 1T) for large amounts
+--   abbreviationThreshold: Minimum value to start abbreviating
+Config.Currency = {
+    enabled = true,
+    maxValue = 999000000000000, -- 999 trillion (maximum supported currency amount)
+    -- Locale-specific currency settings
+    -- Each locale defines how currency should be displayed for that language/region
+    localeSettings = {
+        -- English (United States) - US Dollar
+        -- Example: $1,234.56
+        en = {
+            symbol = '$',
+            position = 'before', -- Symbol before amount
+            decimalPlaces = 2,
+            thousandsSeparator = ',',
+            decimalSeparator = '.',
+            format = '%s%s' -- $1234.56
+        },
+        
+        -- Japanese (Japan) - Japanese Yen
+        -- Example: ¥1,234 (no decimal places)
+        ja = {
+            symbol = '¥',
+            position = 'before',
+            decimalPlaces = 0, -- Yen doesn't use decimal places
+            thousandsSeparator = ',',
+            decimalSeparator = '.',
+            format = '%s%s' -- ¥1234
+        },
+        
+        -- Spanish (Spain/Latin America) - Euro
+        -- Example: 1.234,56 €
+        es = {
+            symbol = '€',
+            position = 'after', -- Symbol after amount
+            decimalPlaces = 2,
+            thousandsSeparator = '.',
+            decimalSeparator = ',',
+            format = '%s %s' -- 1234,56 €
+        },
+        
+        -- French (France) - Euro
+        -- Example: 1 234,56 €
+        fr = {
+            symbol = '€',
+            position = 'after',
+            decimalPlaces = 2,
+            thousandsSeparator = ' ', -- Space as thousands separator
+            decimalSeparator = ',',
+            format = '%s %s' -- 1234,56 €
+        },
+        
+        -- German (Germany) - Euro
+        -- Example: 1.234,56 €
+        de = {
+            symbol = '€',
+            position = 'after',
+            decimalPlaces = 2,
+            thousandsSeparator = '.',
+            decimalSeparator = ',',
+            format = '%s %s' -- 1234,56 €
+        },
+        
+        -- Portuguese (Brazil) - Brazilian Real
+        -- Example: R$ 1.234,56
+        pt = {
+            symbol = 'R$',
+            position = 'before',
+            decimalPlaces = 2,
+            thousandsSeparator = '.',
+            decimalSeparator = ',',
+            format = '%s %s' -- R$ 1234,56
+        }
+    },
+    enableValidation = true,
+    enableFormatting = true,
+    enableAbbreviation = true,
+    abbreviationThreshold = 1000000 -- Start abbreviating at 1M
+}
+
+-- Internationalization Settings
+Config.Internationalization = {
+    enabled = true,
+    defaultLocale = 'en',
+    supportedLocales = {'en', 'ja', 'es', 'fr', 'de', 'pt'},
+    fallbackLocale = 'en',
+    enableAutoDetection = true,
+    enablePlayerPreference = true,
+    localeStorageKey = 'gphone_locale',
+    serverLocaleCommand = 'gphone_locale'
+}
+
+-- Setup Wizard Settings
+-- Show the setup wizard on first resource start to configure language, currency, and features
+-- Once completed, the wizard will not show again unless this is set to true
+Config.ShowSetupWizard = false -- Set to true to show the setup wizard on resource start
+
+-- Contact Sharing Settings
+-- Enables proximity-based contact sharing similar to iPhone's contact sharing functionality
+Config.ContactSharing = {
+    enabled = true, -- Enable/disable contact sharing feature
+    proximityRadius = 5.0, -- Maximum distance in meters for contact sharing (range: 1-20)
+    requestTimeout = 30, -- Time in seconds before share request expires
+    broadcastDuration = 10, -- Time in seconds for broadcast share visibility
+    updateInterval = 2000, -- Coordinate update interval in milliseconds
+    maxRequestsPerMinute = 5, -- Rate limit for share requests per player
+    enableBroadcastShare = true, -- Enable broadcast sharing (My Card share)
+    enableDirectShare = true, -- Enable direct player-to-player sharing
+    showDistance = true, -- Show distance to nearby players
+    playSound = true, -- Play sound effects for contact sharing events
+    soundVolume = 0.5 -- Sound volume (0.0 to 1.0)
 }

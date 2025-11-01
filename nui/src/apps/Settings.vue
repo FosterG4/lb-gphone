@@ -4,7 +4,7 @@
       <!-- Notifications Section -->
       <div class="settings-section">
         <div class="section-header">
-          <h3>Notifications</h3>
+          <h3>{{ $t('settings.notifications.title') }}</h3>
         </div>
         
         <div class="settings-list">
@@ -17,8 +17,8 @@
                 </svg>
               </div>
               <div class="setting-text">
-                <div class="setting-label">Enable Notifications</div>
-                <div class="setting-description">Show notification banners</div>
+                <div class="setting-label">{{ $t('settings.notifications.enable') }}</div>
+                <div class="setting-description">{{ $t('settings.notifications.enableDescription') }}</div>
               </div>
             </div>
             <label class="toggle-switch">
@@ -41,8 +41,8 @@
                 </svg>
               </div>
               <div class="setting-text">
-                <div class="setting-label">Notification Sounds</div>
-                <div class="setting-description">Play sounds for notifications</div>
+                <div class="setting-label">{{ $t('settings.notifications.sounds') }}</div>
+                <div class="setting-description">{{ $t('settings.notifications.soundsDescription') }}</div>
               </div>
             </div>
             <label class="toggle-switch">
@@ -60,7 +60,7 @@
       <!-- Sound Section -->
       <div class="settings-section">
         <div class="section-header">
-          <h3>Sound</h3>
+          <h3>{{ $t('settings.sound.title') }}</h3>
         </div>
         
         <div class="settings-list">
@@ -74,7 +74,7 @@
                 </svg>
               </div>
               <div class="setting-text">
-                <div class="setting-label">Volume</div>
+                <div class="setting-label">{{ $t('settings.sound.volume') }}</div>
                 <div class="setting-description">{{ volume }}%</div>
               </div>
             </div>
@@ -95,7 +95,7 @@
       <!-- Theme Section -->
       <div class="settings-section">
         <div class="section-header">
-          <h3>Appearance</h3>
+          <h3>{{ $t('settings.appearance.title') }}</h3>
         </div>
         
         <div class="settings-list">
@@ -115,8 +115,8 @@
                 </svg>
               </div>
               <div class="setting-text">
-                <div class="setting-label">Theme</div>
-                <div class="setting-description">Choose your preferred theme</div>
+                <div class="setting-label">{{ $t('settings.appearance.theme') }}</div>
+                <div class="setting-description">{{ $t('settings.appearance.themeDescription') }}</div>
               </div>
             </div>
             
@@ -150,10 +150,56 @@
         </div>
       </div>
       
+      <!-- Language Section -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h3>{{ $t('settings.language.title') }}</h3>
+        </div>
+        
+        <div class="settings-list">
+          <div class="setting-item language-setting">
+            <div class="setting-info full-width">
+              <div class="setting-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <div class="setting-text">
+                <div class="setting-label">{{ $t('settings.language.label') }}</div>
+                <div class="setting-description">{{ $t('settings.language.description') }}</div>
+              </div>
+            </div>
+            
+            <div class="language-selector">
+              <div 
+                v-for="lang in availableLanguages" 
+                :key="lang.code"
+                class="language-option"
+                :class="{ active: currentLocale === lang.code }"
+                @click="changeLanguage(lang.code)"
+              >
+                <div class="language-flag">{{ lang.flag }}</div>
+                <div class="language-info">
+                  <div class="language-name">{{ lang.name }}</div>
+                  <div class="language-native">{{ lang.native }}</div>
+                </div>
+                <div v-if="currentLocale === lang.code" class="language-check">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Display Section -->
       <div class="settings-section">
         <div class="section-header">
-          <h3>Display</h3>
+          <h3>{{ $t('settings.display.title') }}</h3>
         </div>
         
         <div class="settings-list">
@@ -167,8 +213,8 @@
                 </svg>
               </div>
               <div class="setting-text">
-                <div class="setting-label">Auto-Lock</div>
-                <div class="setting-description">Lock phone after inactivity</div>
+                <div class="setting-label">{{ $t('settings.display.autoLock') }}</div>
+                <div class="setting-description">{{ $t('settings.display.autoLockDescription') }}</div>
               </div>
             </div>
             <label class="toggle-switch">
@@ -186,15 +232,15 @@
       <!-- About Section -->
       <div class="settings-section">
         <div class="section-header">
-          <h3>About</h3>
+          <h3>{{ $t('settings.about.title') }}</h3>
         </div>
         
         <div class="settings-list">
           <div class="setting-item info-item">
             <div class="setting-info">
               <div class="setting-text">
-                <div class="setting-label">Phone Number</div>
-                <div class="setting-value">{{ phoneNumber || 'Not assigned' }}</div>
+                <div class="setting-label">{{ $t('settings.about.phoneNumber') }}</div>
+                <div class="setting-value">{{ phoneNumber || $t('settings.about.notAssigned') }}</div>
               </div>
             </div>
           </div>
@@ -202,7 +248,7 @@
           <div class="setting-item info-item">
             <div class="setting-info">
               <div class="setting-text">
-                <div class="setting-label">Version</div>
+                <div class="setting-label">{{ $t('settings.about.version') }}</div>
                 <div class="setting-value">1.0.0</div>
               </div>
             </div>
@@ -216,11 +262,13 @@
 <script>
 import { computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'Settings',
   setup() {
     const store = useStore()
+    const { locale } = useI18n()
     
     // Computed properties
     const theme = computed(() => store.state.settings.theme)
@@ -229,6 +277,16 @@ export default {
     const volume = computed(() => store.state.settings.volume)
     const availableThemes = computed(() => store.state.settings.availableThemes)
     const phoneNumber = computed(() => store.state.phone.phoneNumber)
+    const currentLocale = computed(() => locale.value)
+    
+    const availableLanguages = computed(() => [
+      { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' },
+      { code: 'ja', name: 'Japanese', native: '日本語', flag: '🇯🇵' },
+      { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸' },
+      { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' },
+      { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪' },
+      { code: 'pt', name: 'Portuguese', native: 'Português', flag: '🇵🇹' }
+    ])
     
     // Load settings on mount
     onMounted(async () => {
@@ -297,6 +355,54 @@ export default {
       return themeName.charAt(0).toUpperCase() + themeName.slice(1)
     }
     
+    const changeLanguage = async (newLocale) => {
+      try {
+        // Update i18n locale immediately for instant UI feedback
+        locale.value = newLocale
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('phone-locale', newLocale)
+        
+        // Send to server via NUI callback to save in database
+        const response = await fetch(`https://${GetParentResourceName()}/setPlayerLocale`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            locale: newLocale
+          })
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+          // Show success notification
+          store.dispatch('phone/showNotification', {
+            type: 'success',
+            title: 'Language Changed',
+            message: `Language switched to ${availableLanguages.value.find(l => l.code === newLocale)?.name}`,
+            duration: 2000
+          })
+        } else {
+          throw new Error(result.message || 'Failed to save language preference')
+        }
+      } catch (error) {
+        console.error('Failed to change language:', error)
+        store.dispatch('phone/showNotification', {
+          type: 'error',
+          title: 'Error',
+          message: 'Failed to change language',
+          duration: 3000
+        })
+      }
+    }
+    
+    // Helper function to get resource name
+    const GetParentResourceName = () => {
+      return window.GetParentResourceName ? window.GetParentResourceName() : 'phone'
+    }
+    
     return {
       theme,
       notificationEnabled,
@@ -304,13 +410,16 @@ export default {
       volume,
       availableThemes,
       phoneNumber,
+      currentLocale,
+      availableLanguages,
       changeTheme,
       toggleNotifications,
       toggleSound,
       updateVolume,
       toggleAutoLock,
       getCustomSetting,
-      formatThemeName
+      formatThemeName,
+      changeLanguage
     }
   }
 }
@@ -617,6 +726,91 @@ input:checked + .toggle-slider:before {
   align-items: center;
   justify-content: center;
   color: white;
+}
+
+/* Language Selector */
+.language-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0 8px;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border-primary);
+  background: var(--background-elevated);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.language-option:hover {
+  border-color: var(--primary-color);
+  background: var(--background-secondary);
+}
+
+.language-option.active {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+}
+
+.language-flag {
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--background-primary);
+  flex-shrink: 0;
+}
+
+.language-option.active .language-flag {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.language-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.language-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.language-option.active .language-name {
+  color: white;
+}
+
+.language-native {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.language-option.active .language-native {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.language-check {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
 }
 
 /* Info Items */
