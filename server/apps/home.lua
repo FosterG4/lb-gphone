@@ -478,8 +478,8 @@ function HomeApp:StartKeyExpirationChecker()
     end)
 end
 
--- Register NUI callbacks
-RegisterNUICallback('home:getProperties', function(data, cb)
+-- Register server events (NUI callbacks should be on client side)
+RegisterNetEvent('phone:home:getProperties', function(data, cb)
     local source = source
     
     local properties = HomeApp:GetPlayerProperties(source)
@@ -490,7 +490,7 @@ RegisterNUICallback('home:getProperties', function(data, cb)
     })
 end)
 
-RegisterNUICallback('home:toggleLock', function(data, cb)
+RegisterNetEvent('phone:home:toggleLock', function(data, cb)
     local source = source
     local propertyId = data.propertyId
     local action = data.action
@@ -504,7 +504,7 @@ RegisterNUICallback('home:toggleLock', function(data, cb)
     cb(result)
 end)
 
-RegisterNUICallback('home:getPropertyKeys', function(data, cb)
+RegisterNetEvent('phone:home:getPropertyKeys', function(data, cb)
     local source = source
     local propertyId = data.propertyId
     
@@ -521,7 +521,7 @@ RegisterNUICallback('home:getPropertyKeys', function(data, cb)
     })
 end)
 
-RegisterNUICallback('home:grantKey', function(data, cb)
+RegisterNetEvent('phone:home:grantKey', function(data, cb)
     local source = source
     local propertyId = data.propertyId
     local targetNumber = data.targetNumber
@@ -536,7 +536,7 @@ RegisterNUICallback('home:grantKey', function(data, cb)
     cb(result)
 end)
 
-RegisterNUICallback('home:revokeKey', function(data, cb)
+RegisterNetEvent('phone:home:revokeKey', function(data, cb)
     local source = source
     local keyId = data.keyId
     
@@ -549,7 +549,7 @@ RegisterNUICallback('home:revokeKey', function(data, cb)
     cb(result)
 end)
 
-RegisterNUICallback('home:getAccessLogs', function(data, cb)
+RegisterNetEvent('phone:home:getAccessLogs', function(data, cb)
     local source = source
     local propertyId = data.propertyId
     

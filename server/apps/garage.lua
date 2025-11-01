@@ -177,8 +177,8 @@ function GarageApp:UpdateVehicleStatus(plate, status)
     return true
 end
 
--- Register NUI callbacks
-RegisterNUICallback('garage:getVehicles', function(data, cb)
+-- Register server events (NUI callbacks should be on client side)
+RegisterNetEvent('phone:garage:getVehicles', function(data, cb)
     local source = source
     
     local vehicles = GarageApp:GetPlayerVehicles(source)
@@ -193,7 +193,7 @@ RegisterNUICallback('garage:getVehicles', function(data, cb)
     })
 end)
 
-RegisterNUICallback('garage:locateVehicle', function(data, cb)
+RegisterNetEvent('phone:garage:locateVehicle', function(data, cb)
     local source = source
     local plate = data.plate
     
@@ -217,7 +217,7 @@ RegisterNUICallback('garage:locateVehicle', function(data, cb)
     end
 end)
 
-RegisterNUICallback('garage:setWaypoint', function(data, cb)
+RegisterNetEvent('phone:garage:setWaypoint', function(data, cb)
     local source = source
     
     if not data.x or not data.y then
@@ -458,8 +458,8 @@ function GarageApp:SetValetTimeout(plate)
     end)
 end
 
--- Register valet NUI callback
-RegisterNUICallback('garage:requestValet', function(data, cb)
+-- Register valet server event
+RegisterNetEvent('phone:garage:requestValet', function(data, cb)
     local source = source
     local plate = data.plate
     
