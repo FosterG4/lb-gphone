@@ -28,8 +28,8 @@ function Qbox:new()
     -- Instead, it uses a global QBX object or direct exports
     -- Try multiple methods to get Qbox with retries for timing issues
     
-    local maxRetries = 30
-    local retryDelay = 200 -- milliseconds
+    local maxRetries = 5
+    local retryDelay = 100 -- milliseconds
     
     for attempt = 1, maxRetries do
         -- Method 1: Try global QBX (most common in newer Qbox)

@@ -15,6 +15,12 @@ local function InitializeFramework()
     
     print('^3[Phone] ^7Loading framework adapter: ' .. frameworkType)
     
+    -- For Qbox, add extra delay to ensure it's fully initialized
+    if frameworkType == 'qbox' then
+        print('^3[Phone] ^7Waiting for Qbox to fully initialize...^7')
+        Wait(2000) -- Wait 2 seconds for Qbox to finish loading
+    end
+    
     -- Load the appropriate framework adapter
     if frameworkType == 'esx' then
         Framework = require('server.framework.esx')
@@ -61,6 +67,25 @@ CreateThread(function()
     if not dbSuccess then
         print('^1[Phone] ^7Failed to initialize database! Resource may not function properly.')
         return
+    end
+    
+    -- For Qbox framework, wait for it to be fully ready
+    if Config.Framework == 'qbox' then
+        print('^3[Phone] ^7Detected Qbox framework, waiting for full initialization...^7')
+        local maxWait = 30 -- 30 seconds max
+        local waited = 0
+        while waited < maxWait do
+            -- Check if Qbox is ready by looking for its global object
+            if _G.QBX or (pcall(function() return exports.qbx_core:GetCoreObject() end)) then
+                print('^2[Phone] ^7Qbox framework is ready!^7')
+                break
+            end
+            Wait(500)
+            waited = waited + 0.5
+            if waited % 5 == 0 then
+                print('^3[Phone] ^7Still waiting for Qbox... (' .. waited .. 's)^7')
+            end
+        end
     end
     
     -- Initialize framework adapter
