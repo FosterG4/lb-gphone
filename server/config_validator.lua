@@ -147,6 +147,11 @@ function ConfigValidator.ValidateCurrencyConfiguration()
         return false
     end
     
+    -- Skip validation if currency system is disabled
+    if Config.Currency.enabled == false then
+        return true
+    end
+    
     -- Validate maxValue
     if not Config.Currency.maxValue then
         AddError('Config.Currency.maxValue is not defined')
@@ -327,7 +332,7 @@ function ConfigValidator.ValidateEnabledApps()
         -- Commerce
         'marketplace', 'pages',
         -- Finance
-        'bank', 'bankr', 'crypto', 'cryptox',
+        'bank', 'bankr', 'wallet', 'crypto', 'cryptox',
         -- Entertainment
         'musicly',
         -- Safety

@@ -11,7 +11,7 @@ function Qbox:new()
     
     -- Try to get Qbox shared object
     -- Qbox uses 'qbx_core' as the resource name
-    self.Framework = exports.qbx_core:GetQbox()
+    self.Framework = exports.qbx_core:GetCoreObject()
     
     if not self.Framework then
         print('[Phone] ^1ERROR: Failed to load Qbox framework^7')

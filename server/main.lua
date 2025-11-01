@@ -293,7 +293,7 @@ require('server.media.photos')
 require('server.media.videos')
 require('server.media.audio')
 require('server.media.migration')
-require('server.media.testing')
+-- require('server.media.testing') -- Testing module not included in production
 
 
 -- Media Management Event Handlers
