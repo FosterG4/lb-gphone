@@ -5,46 +5,68 @@ local Qbox = {}
 Qbox.__index = Qbox
 Qbox.Framework = nil
 
+-- Wait function for retry logic
+local function Wait(ms)
+    local start = os.clock()
+    while (os.clock() - start) * 1000 < ms do
+        -- Busy wait
+    end
+end
+
 --- Initialize Qbox framework
 function Qbox:new()
     local self = setmetatable({}, Qbox)
     
     -- Qbox doesn't use exports like QBCore
     -- Instead, it uses a global QBX object or direct exports
-    -- Try multiple methods to get Qbox
+    -- Try multiple methods to get Qbox with retries for timing issues
     
-    -- Method 1: Try global QBX (most common in newer Qbox)
-    local success, result = pcall(function()
-        return _G.QBX
-    end)
-    if success and result then
-        self.Framework = result
-        print('[Phone] Initialized Qbox framework adapter (via global QBX)')
-        return self
+    local maxRetries = 5
+    local retryDelay = 100 -- milliseconds
+    
+    for attempt = 1, maxRetries do
+        -- Method 1: Try global QBX (most common in newer Qbox)
+        local success, result = pcall(function()
+            return _G.QBX
+        end)
+        if success and result then
+            self.Framework = result
+            print('[Phone] Initialized Qbox framework adapter (via global QBX)')
+            return self
+        end
+        
+        -- Method 2: Try exports.qbx_core
+        success, result = pcall(function()
+            return exports.qbx_core:GetCoreObject()
+        end)
+        if success and result then
+            self.Framework = result
+            print('[Phone] Initialized Qbox framework adapter (via qbx_core export)')
+            return self
+        end
+        
+        -- Method 3: Try exports['qbx-core'] (alternative naming)
+        success, result = pcall(function()
+            return exports['qbx-core']:GetCoreObject()
+        end)
+        if success and result then
+            self.Framework = result
+            print('[Phone] Initialized Qbox framework adapter (via qbx-core export)')
+            return self
+        end
+        
+        -- If not found and not last attempt, wait and retry
+        if attempt < maxRetries then
+            if attempt == 1 then
+                print('[Phone] ^3Waiting for Qbox framework to initialize... (attempt ' .. attempt .. '/' .. maxRetries .. ')^7')
+            end
+            Wait(retryDelay)
+        end
     end
     
-    -- Method 2: Try exports.qbx_core
-    success, result = pcall(function()
-        return exports.qbx_core:GetCoreObject()
-    end)
-    if success and result then
-        self.Framework = result
-        print('[Phone] Initialized Qbox framework adapter (via qbx_core export)')
-        return self
-    end
-    
-    -- Method 3: Try exports['qbx-core'] (alternative naming)
-    success, result = pcall(function()
-        return exports['qbx-core']:GetCoreObject()
-    end)
-    if success and result then
-        self.Framework = result
-        print('[Phone] Initialized Qbox framework adapter (via qbx-core export)')
-        return self
-    end
-    
-    print('[Phone] ^1ERROR: Failed to load Qbox framework^7')
+    print('[Phone] ^1ERROR: Failed to load Qbox framework after ' .. maxRetries .. ' attempts^7')
     print('[Phone] ^3Make sure qbx_core resource is started before lb-gphone^7')
+    print('[Phone] ^3Check your server.cfg load order: ensure qbx_core should come before ensure lb-gphone^7')
     return nil
 end
 

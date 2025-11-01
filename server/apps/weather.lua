@@ -120,8 +120,10 @@ end
 
 -- Helper function to get current game time
 local function GetCurrentGameTime()
-    local hour = GetClockHours()
-    local minute = GetClockMinutes()
+    -- Use os.date for server-side time since GetClockHours/GetClockMinutes are client-side natives
+    local currentTime = os.date("*t")
+    local hour = currentTime.hour
+    local minute = currentTime.min
     
     return {
         hour = hour,
