@@ -61,7 +61,7 @@
 <script>
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
-import StatusBar from "./StatusBar.vue";
+import StatusBar from "./Statusbar.vue";
 import SetupFlow from "./SetupFlow.vue";
 import Lockscreen from "./Lockscreen.vue";
 import Homescreen from "./Homescreen.vue";

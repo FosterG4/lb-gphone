@@ -51,7 +51,7 @@ const WifiIcon = () =>
   );
 
 export default {
-  name: "StatusBar",
+  name: "Statusbar",
   components: {
     WifiIcon,
   },
