@@ -291,7 +291,14 @@ end
 -- Register server events
 RegisterNetEvent('phone:server:getSettings', function()
     local src = source
-    local phoneNumber = GetCachedPhoneNumber(src)
+    
+    -- Safety check: ensure GetCachedPhoneNumber is available
+    if not GetCachedPhoneNumber then
+        print('^1[Phone Settings] ERROR: GetCachedPhoneNumber not available yet^7')
+        return
+    end
+    
+    al phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:settingsError', src, 'Phone number not found')

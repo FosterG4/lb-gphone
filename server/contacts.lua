@@ -184,6 +184,11 @@ end
 -- Get contacts
 RegisterNetEvent('phone:server:getContacts', function()
     local source = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(source)
     
     if not phoneNumber then

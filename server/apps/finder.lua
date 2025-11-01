@@ -5,7 +5,11 @@
 RegisterNetEvent('phone:server:getFinderData', function()
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -82,7 +86,11 @@ end)
 RegisterNetEvent('phone:server:addFinderDevice', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -157,7 +165,11 @@ end)
 RegisterNetEvent('phone:server:updateDeviceLocation', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -187,7 +199,11 @@ end)
 RegisterNetEvent('phone:server:playDeviceSound', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -238,7 +254,11 @@ end)
 RegisterNetEvent('phone:server:toggleDeviceLost', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -266,7 +286,11 @@ end)
 RegisterNetEvent('phone:server:removeFinderDevice', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -300,7 +324,11 @@ end)
 RegisterNetEvent('phone:server:updateFinderSettings', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -345,7 +373,11 @@ end)
 RegisterNetEvent('phone:server:getDeviceDetails', function(data)
     local source = source
     
-    if not Framework:PlayerExists(source) then
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
+    if not Framework or not Framework:PlayerExists(source) then
         return
     end
     
@@ -392,7 +424,8 @@ CreateThread(function()
         local players = GetPlayers()
         for _, playerId in ipairs(players) do
             local source = tonumber(playerId)
-            if Framework:PlayerExists(source) then
+            -- Safety check: ensure Framework is available
+            if Framework and Framework:PlayerExists(source) then
                 local phoneNumber = Framework:GetPhoneNumber(source)
                 if phoneNumber then
                     local coords = GetEntityCoords(GetPlayerPed(source))

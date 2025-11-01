@@ -156,6 +156,11 @@ end)
 -- Accept call
 RegisterNetEvent('phone:server:acceptCall', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local callerId = data.callerId
     
     -- Find the call
@@ -255,6 +260,11 @@ end)
 -- Get call history
 RegisterNetEvent('phone:server:getCallHistory', function()
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then

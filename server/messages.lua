@@ -9,6 +9,13 @@ local offlineMessageQueue = {}
 -- Get all messages for a player
 RegisterNetEvent('phone:server:getMessages', function()
     local src = source
+    
+    -- Safety check: ensure GetCachedPhoneNumber is available
+    if not GetCachedPhoneNumber then
+        print('^1[Phone Messages] ERROR: GetCachedPhoneNumber not available yet^7')
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -149,6 +156,12 @@ end)
 -- Mark messages as read
 RegisterNetEvent('phone:server:markMessagesRead', function(data)
     local src = source
+    
+    -- Safety check: ensure GetCachedPhoneNumber is available
+    if not GetCachedPhoneNumber then
+        return
+    end
+    
     local myNumber = GetCachedPhoneNumber(src)
     
     if not myNumber or not data or not data.phoneNumber then
@@ -181,6 +194,13 @@ end)
 -- Deliver queued messages when player logs in
 RegisterNetEvent('phone:server:playerLoaded', function()
     local src = source
+    
+    -- Safety check: ensure GetCachedPhoneNumber is available
+    if not GetCachedPhoneNumber then
+        print('^1[Phone Messages] ERROR: GetCachedPhoneNumber not available yet^7')
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then

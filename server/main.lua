@@ -9,6 +9,9 @@ local playerPhoneNumbers = {} -- Cache for player phone numbers
 -- Framework adapter instance
 Framework = nil
 
+-- Global ready flag to prevent events from firing before initialization
+_G.PhoneSystemReady = false
+
 -- Initialize framework adapter
 local function InitializeFramework()
     local frameworkType = Config.Framework or 'standalone'
@@ -112,12 +115,20 @@ CreateThread(function()
     local Storage = require('server.media.storage')
     Storage.Initialize()
     
+-- Mark system as ready
+    _G.PhoneSystemReady = true
+    
     print('^2[Phone] ^7Smartphone system initialized successfully!')
 end)
 
 -- Player connected event
 RegisterNetEvent('phone:server:playerLoaded', function()
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        print('^3[Phone] ^7System not ready yet, please wait...^7')
+        return
+    end
     
     if not Framework then
         print('^1[Phone] ^7Framework not initialized!')
@@ -217,6 +228,11 @@ end
 -- Request phone data
 RegisterNetEvent('phone:server:requestPhoneData', function()
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = playerPhoneNumbers[src]
     
     if not phoneNumber then
@@ -339,6 +355,11 @@ require('server.media.migration')
 -- Get media (photos, videos, audio)
 RegisterNetEvent('phone:server:getMedia', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -382,6 +403,11 @@ end)
 -- Delete media
 RegisterNetEvent('phone:server:deleteMedia', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -411,6 +437,11 @@ end)
 -- Get albums
 RegisterNetEvent('phone:server:getAlbums', function()
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -441,6 +472,11 @@ end)
 -- Create album
 RegisterNetEvent('phone:server:createAlbum', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -487,6 +523,11 @@ end)
 -- Update album
 RegisterNetEvent('phone:server:updateAlbum', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
@@ -550,6 +591,11 @@ end)
 -- Delete album
 RegisterNetEvent('phone:server:deleteAlbum', function(data)
     local src = source
+    
+    if not _G.PhoneSystemReady then
+        return
+    end
+    
     local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
