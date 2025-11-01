@@ -15,12 +15,6 @@ local function InitializeFramework()
     
     print('^3[Phone] ^7Loading framework adapter: ' .. frameworkType)
     
-    -- For Qbox, add extra delay to ensure it's fully initialized
-    if frameworkType == 'qbox' then
-        print('^3[Phone] ^7Waiting for Qbox to fully initialize...^7')
-        Wait(2000) -- Wait 2 seconds for Qbox to finish loading
-    end
-    
     -- Load the appropriate framework adapter
     if frameworkType == 'esx' then
         Framework = require('server.framework.esx')
@@ -74,17 +68,36 @@ CreateThread(function()
         print('^3[Phone] ^7Detected Qbox framework, waiting for full initialization...^7')
         local maxWait = 30 -- 30 seconds max
         local waited = 0
-        while waited < maxWait do
-            -- Check if Qbox is ready by looking for its global object
-            if _G.QBX or (pcall(function() return exports.qbx_core:GetCoreObject() end)) then
-                print('^2[Phone] ^7Qbox framework is ready!^7')
+        local qboxReady = false
+        
+        e waited < maxWait and not qboxReady do
+            -- Check if Qbox is ready by looking for its global object or export
+            if _G.QBX then
+                qboxReady = true
+                print('^2Qbox framework is ready (via global QBX)!^7')
                 break
             end
+            
+            -- Try export method
+            local success, result = pcall(function()
+                return exports.qbx_core:GetCoreObject()
+            end)
+            if success and result then
+                qboxReady = true
+                print('^2[Phone] ^7Qbox framework is ready (via export)!^7')
+                break
+            end
+            
             Wait(500)
             waited = waited + 0.5
             if waited % 5 == 0 then
                 print('^3[Phone] ^7Still waiting for Qbox... (' .. waited .. 's)^7')
             end
+        end
+        
+        if not qboxReady then
+            print('^1[Phone] ^7Qbox framework did not initialize within ' .. maxWait .. ' seconds^7')
+            print('^3[Phone] ^7Continuing anyway, but framework integration may not work^7')
         end
     end
     
