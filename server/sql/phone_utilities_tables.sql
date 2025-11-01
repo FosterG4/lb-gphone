@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS phone_notes (
     INDEX idx_created (created_at DESC) COMMENT 'Sort notes by creation date',
     
     -- Foreign key relationships
+    -- Cascade delete: Remove all notes when player is deleted
     FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
-        COMMENT 'Cascade delete: Remove all notes when player is deleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='User notes with automatic timestamps';
 
