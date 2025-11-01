@@ -72,20 +72,11 @@ body {
 
 #phone-app {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  bottom: 20px;
+  right: 20px;
   display: none;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 20px;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-#phone-app > * {
   pointer-events: auto;
+  z-index: 9999;
 }
 
 #phone-app.phone-visible {

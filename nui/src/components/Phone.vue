@@ -289,8 +289,8 @@ export default {
 
 <style scoped>
 .phone-container {
-  width: 400px;
-  height: 850px;
+  width: 320px;
+  height: 680px;
   position: relative;
 }
 
