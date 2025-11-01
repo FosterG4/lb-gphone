@@ -1,12 +1,17 @@
 import { createI18n } from 'vue-i18n'
 
-// Import locale files
-import en from './locales/en.json'
-import ja from './locales/ja.json'
-import es from './locales/es.json'
-
 // Supported locales
 const SUPPORTED_LOCALES = ['en', 'ja', 'es', 'fr', 'de', 'pt']
+
+// Lazy load locale files
+const localeModules = {
+  en: () => import('./locales/en.json'),
+  ja: () => import('./locales/ja.json'),
+  es: () => import('./locales/es.json'),
+  fr: () => import('./locales/fr.json'),
+  de: () => import('./locales/de.json'),
+  pt: () => import('./locales/pt.json')
+}
 
 // Function to get default locale
 function getDefaultLocale() {
@@ -21,16 +26,12 @@ function getDefaultLocale() {
   return SUPPORTED_LOCALES.includes(browserLang) ? browserLang : 'en'
 }
 
-// Create i18n instance
+// Create i18n instance with empty messages (will be loaded async)
 const i18n = createI18n({
   legacy: false,
   locale: getDefaultLocale(),
   fallbackLocale: 'en',
-  messages: {
-    en,
-    ja,
-    es
-  },
+  messages: {},
   numberFormats: {
     en: {
       currency: {
@@ -170,7 +171,7 @@ export function getLocaleDisplayName(locale) {
   return displayNames[locale] || locale
 }
 
-// Load additional locales dynamically if needed
+// Load locale messages dynamically
 export async function loadLocaleMessages(locale) {
   if (!SUPPORTED_LOCALES.includes(locale)) {
     console.warn(`Locale ${locale} is not supported`)
@@ -183,14 +184,27 @@ export async function loadLocaleMessages(locale) {
   }
   
   try {
-    // Dynamically import locale
-    const messages = await import(`./locales/${locale}.json`)
+    const loader = localeModules[locale]
+    if (!loader) {
+      console.error(`No loader found for locale ${locale}`)
+      return false
+    }
+    
+    const messages = await loader()
     i18n.global.setLocaleMessage(locale, messages.default || messages)
     return true
   } catch (error) {
     console.error(`Failed to load locale ${locale}:`, error)
     return false
   }
+}
+
+// Initialize with default locale
+export async function initI18n() {
+  const defaultLocale = getDefaultLocale()
+  await loadLocaleMessages(defaultLocale)
+  await loadLocaleMessages('en') // Always load fallback
+  return i18n
 }
 
 export default i18n

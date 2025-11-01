@@ -2,17 +2,23 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import store from './store'
-import i18n from './i18n'
+import i18n, { initI18n } from './i18n'
+import { showShareDeclinedNotification, showShareErrorNotification, showBroadcastContactAddedNotification } from './utils/notifications'
 import './assets/styles.css'
 import './assets/themes.css'
 import './assets/ios-styles.css'
 
-const app = createApp(App)
-
-app.use(store)
-app.use(i18n)
-
-app.mount('#app')
+// Initialize i18n and mount app
+initI18n().then(() => {
+  const app = createApp(App)
+  
+  app.use(store)
+  app.use(i18n)
+  
+  app.mount('#app')
+}).catch(error => {
+  console.error('Failed to initialize i18n:', error)
+})
 
 // Listen for NUI messages from Lua
 window.addEventListener('message', (event) => {
@@ -133,19 +139,13 @@ window.addEventListener('message', (event) => {
             })
         } else if (action === 'showShareDeclinedNotification') {
             // Handle share declined notification
-            import('./utils/notifications').then(({ showShareDeclinedNotification }) => {
-                showShareDeclinedNotification(data.contactName, i18n.global)
-            })
+            showShareDeclinedNotification(data.contactName, i18n.global)
         } else if (action === 'showShareErrorNotification') {
             // Handle share error notification
-            import('./utils/notifications').then(({ showShareErrorNotification }) => {
-                showShareErrorNotification(data.errorMessage, null, i18n.global)
-            })
+            showShareErrorNotification(data.errorMessage, null, i18n.global)
         } else if (action === 'showBroadcastContactAddedNotification') {
             // Handle broadcast contact added notification
-            import('./utils/notifications').then(({ showBroadcastContactAddedNotification }) => {
-                showBroadcastContactAddedNotification(data.addedBy, i18n.global)
-            })
+            showBroadcastContactAddedNotification(data.addedBy, i18n.global)
         }
     } catch (error) {
         console.error('Error handling NUI message:', error)
