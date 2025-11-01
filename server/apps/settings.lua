@@ -298,7 +298,7 @@ RegisterNetEvent('phone:server:getSettings', function()
         return
     end
     
-    al phoneNumber = GetCachedPhoneNumber(src)
+    local phoneNumber = GetCachedPhoneNumber(src)
     
     if not phoneNumber then
         TriggerClientEvent('phone:client:settingsError', src, 'Phone number not found')

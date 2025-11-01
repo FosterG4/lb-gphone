@@ -73,7 +73,7 @@ CreateThread(function()
         local waited = 0
         local qboxReady = false
         
-        e waited < maxWait and not qboxReady do
+        while waited < maxWait and not qboxReady do
             -- Check if Qbox is ready by looking for its global object or export
             if _G.QBX then
                 qboxReady = true
@@ -107,8 +107,15 @@ CreateThread(function()
     -- Initialize framework adapter
     local frameworkSuccess = InitializeFramework()
     if not frameworkSuccess then
-        print('^1[Phone] ^7Failed to initialize framework adapter! Resource may not function properly.')
-        return
+        print('^1[Phone] ^7Failed to initialize framework adapter!^7')
+        print('^3[Phone] ^7Falling back to standalone mode...^7')
+        Config.Framework = 'standalone'
+        Framework = require('server.framework.standalone')
+        if not Framework then
+            print('^1[Phone] ^7Critical error: Could not load standalone framework!^7')
+            return
+        end
+        print('^2[Phone] ^7Standalone framework loaded successfully^7')
     end
     
     -- Initialize media storage
