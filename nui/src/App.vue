@@ -77,11 +77,15 @@ body {
   width: 100vw;
   height: 100vh;
   display: none;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 20px;
+  pointer-events: none;
   z-index: 9999;
+}
+
+#phone-app > * {
+  pointer-events: auto;
 }
 
 #phone-app.phone-visible {
