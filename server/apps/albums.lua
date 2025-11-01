@@ -1,8 +1,8 @@
 -- Album App Server Handlers
 -- Handles album-related server events
 
-local Albums = require('server.media.albums')
-local PhoneNumbers = require('server.phone_numbers')
+local Albums = lib.require('server.media.albums')
+local PhoneNumbers = lib.require('server.phone_numbers')
 
 -- Get player albums
 RegisterNetEvent('phone:server:getAlbums', function()
@@ -224,7 +224,7 @@ end)
 
 
 -- Media Sharing Events
-local Sharing = require('server.media.sharing')
+local Sharing = lib.require('server.media.sharing')
 
 -- Share media to app
 RegisterNetEvent('phone:server:shareMedia', function(data)

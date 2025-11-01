@@ -1,7 +1,7 @@
 -- Photo Operations Module
 -- Handles photo-specific operations
 
-local Storage = require('server.media.storage')
+local Storage = lib.require('server.media.storage')
 
 local Photos = {}
 

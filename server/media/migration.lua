@@ -2,7 +2,7 @@
 -- Handles migration of local media files to Fivemanage CDN
 
 local Migration = {}
-local Storage = require('server.media.storage')
+local Storage = lib.require('server.media.storage')
 
 -- Migration state tracking
 local migrationState = {

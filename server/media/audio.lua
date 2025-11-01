@@ -1,7 +1,7 @@
 -- Audio Operations Module
 -- Handles voice recording operations
 
-local Storage = require('server.media.storage')
+local Storage = lib.require('server.media.storage')
 
 local Audio = {}
 

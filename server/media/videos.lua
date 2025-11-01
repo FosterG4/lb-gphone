@@ -1,7 +1,7 @@
 -- Video Operations Module
 -- Handles video-specific operations
 
-local Storage = require('server.media.storage')
+local Storage = lib.require('server.media.storage')
 
 local Videos = {}
 

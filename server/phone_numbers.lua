@@ -1,7 +1,7 @@
 -- Phone Number Management Module
 -- Handles phone number operations and lookups
 
-local Database = require('server.database')
+local Database = lib.require('server.database')
 
 -- Get phone number by player source
 RegisterNetEvent('phone:server:getPhoneNumber', function()

@@ -1,7 +1,7 @@
 -- Server Message Management
 -- Handles message sending, receiving, and storage
 
-local Database = require('server.database')
+local Database = lib.require('server.database')
 
 -- Message queue for offline players
 local offlineMessageQueue = {}

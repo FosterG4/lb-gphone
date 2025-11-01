@@ -38,6 +38,7 @@ client_scripts {
 -- Server
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
+    '@ox_lib/init.lua',
     'server/utils.lua',
     'server/config_validator.lua',
     'server/database.lua',
