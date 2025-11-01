@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS phone_alarms (
     INDEX idx_time (alarm_time) COMMENT 'Optimize time-based alarm queries',
     
     -- Foreign key relationships
+    -- Cascade delete: Remove all alarms when player is deleted
     FOREIGN KEY (owner_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
-        COMMENT 'Cascade delete: Remove all alarms when player is deleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Alarm configurations with recurrence support';
 
@@ -160,8 +160,8 @@ CREATE TABLE IF NOT EXISTS phone_voice_recordings (
     INDEX idx_file_size (file_size) COMMENT 'Calculate total storage usage per user',
     
     -- Foreign key relationships
+    -- Cascade delete: Remove all recordings when player is deleted
     FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
-        COMMENT 'Cascade delete: Remove all recordings when player is deleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Voice recordings with quality and size metadata';
 
@@ -204,8 +204,8 @@ CREATE TABLE IF NOT EXISTS phone_voice_recorder_settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
     
     -- Foreign key relationships
+    -- Cascade delete: Remove settings when player is deleted
     FOREIGN KEY (phone_number) REFERENCES phone_players(phone_number) ON DELETE CASCADE
-        COMMENT 'Cascade delete: Remove settings when player is deleted'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Voice recorder user preferences and settings';
 
