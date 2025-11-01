@@ -51,17 +51,29 @@ const WifiIcon = () =>
   );
 
 export default {
-  name: "Statusbar",
+  name: "StatusBar",
   components: {
     WifiIcon,
   },
-  setup() {
+  props: {
+    signalStrength: {
+      type: Number,
+      default: 4,
+      validator: (value) => value >= 0 && value <= 4
+    },
+    wifiConnected: {
+      type: Boolean,
+      default: true
+    },
+    batteryLevel: {
+      type: Number,
+      default: 87,
+      validator: (value) => value >= 0 && value <= 100
+    }
+  },
+  setup(props) {
     const currentTime = ref("");
-    const signalStrength = ref(4);
-    const wifiConnected = ref(true);
-    const batteryLevel = ref(87);
-    
-    let timeInterval;
+    let timeInterval = null;
 
     const updateTime = () => {
       const now = new Date();
@@ -72,20 +84,21 @@ export default {
 
     onMounted(() => {
       updateTime();
-      timeInterval = setInterval(updateTime, 1000);
+      timeInterval = setInterval(updateTime, 60000); // Update every minute, not second
     });
 
     onUnmounted(() => {
       if (timeInterval) {
         clearInterval(timeInterval);
+        timeInterval = null;
       }
     });
 
     return {
       currentTime,
-      signalStrength,
-      wifiConnected,
-      batteryLevel,
+      signalStrength: props.signalStrength,
+      wifiConnected: props.wifiConnected,
+      batteryLevel: props.batteryLevel,
     };
   },
 };
