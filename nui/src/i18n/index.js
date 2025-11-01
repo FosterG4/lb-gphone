@@ -1,7 +1,16 @@
 import { createI18n } from 'vue-i18n'
 
-// Supported locales
+// Supported locales configuration
 const SUPPORTED_LOCALES = ['en', 'ja', 'es', 'fr', 'de', 'pt']
+
+const LOCALE_DISPLAY_NAMES = {
+  en: 'English',
+  ja: '日本語',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  pt: 'Português'
+}
 
 // Lazy load locale files
 const localeModules = {
@@ -12,6 +21,9 @@ const localeModules = {
   de: () => import('./locales/de.json'),
   pt: () => import('./locales/pt.json')
 }
+
+// Cache for loaded locales
+const loadedLocales = new Set()
 
 // Function to get default locale
 function getDefaultLocale() {
@@ -133,20 +145,23 @@ const i18n = createI18n({
 })
 
 // Helper functions
-export function setLocale(locale) {
-  if (SUPPORTED_LOCALES.includes(locale)) {
-    i18n.global.locale.value = locale
-    localStorage.setItem('phone-locale', locale)
-    return true
+export async function setLocale(locale) {
+  if (!SUPPORTED_LOCALES.includes(locale)) {
+    console.warn(`Locale '${locale}' is not supported`)
+    return false
   }
-  return false
+  
+  // Ensure locale is loaded before switching
+  await loadLocaleMessages(locale)
+  i18n.global.locale.value = locale
+  localStorage.setItem('phone-locale', locale)
+  return true
 }
 
 // Load locale from server settings
-export function loadLocaleFromSettings(settings) {
-  if (settings && settings.locale && SUPPORTED_LOCALES.includes(settings.locale)) {
-    setLocale(settings.locale)
-    return true
+export async function loadLocaleFromSettings(settings) {
+  if (settings?.locale && SUPPORTED_LOCALES.includes(settings.locale)) {
+    return await setLocale(settings.locale)
   }
   return false
 }
@@ -156,45 +171,38 @@ export function getCurrentLocale() {
 }
 
 export function getAvailableLocales() {
-  return SUPPORTED_LOCALES
+  return [...SUPPORTED_LOCALES]
 }
 
 export function getLocaleDisplayName(locale) {
-  const displayNames = {
-    en: 'English',
-    ja: '日本語',
-    es: 'Español',
-    fr: 'Français',
-    de: 'Deutsch',
-    pt: 'Português'
-  }
-  return displayNames[locale] || locale
+  return LOCALE_DISPLAY_NAMES[locale] || locale
 }
 
-// Load locale messages dynamically
+// Load locale messages dynamically with caching
 export async function loadLocaleMessages(locale) {
   if (!SUPPORTED_LOCALES.includes(locale)) {
-    console.warn(`Locale ${locale} is not supported`)
+    console.warn(`Locale '${locale}' is not supported`)
     return false
   }
   
-  // Check if already loaded
-  if (i18n.global.availableLocales.includes(locale)) {
+  // Check if already loaded (use cache instead of availableLocales)
+  if (loadedLocales.has(locale)) {
     return true
   }
   
   try {
     const loader = localeModules[locale]
     if (!loader) {
-      console.error(`No loader found for locale ${locale}`)
+      console.error(`No loader found for locale '${locale}'`)
       return false
     }
     
     const messages = await loader()
     i18n.global.setLocaleMessage(locale, messages.default || messages)
+    loadedLocales.add(locale)
     return true
   } catch (error) {
-    console.error(`Failed to load locale ${locale}:`, error)
+    console.error(`Failed to load locale '${locale}':`, error)
     return false
   }
 }

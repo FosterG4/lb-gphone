@@ -30,12 +30,8 @@ export default defineConfig({
             if (id.includes('lucide-vue-next')) {
               return 'icons'
             }
-          }
-          
-          // Separate chunk for locale files
-          if (id.includes('/locales/') && id.endsWith('.json')) {
-            const locale = id.match(/\/locales\/(\w+)\.json/)?.[1]
-            return locale ? locale : 'locales'
+            // Other node_modules go to vendor-misc
+            return 'vendor-misc'
           }
           
           // Separate chunk for views/apps if they exist
